@@ -47,6 +47,7 @@ jobs:
         run: >
           pyinstaller --noconfirm --clean --windowed --onedir
           --name Aiuta
+          --paths .
           --icon installer/aiuta.ico
           --add-data "aiuta/web;aiuta/web"
           --add-data "aiuta/locales;aiuta/locales"
@@ -66,10 +67,14 @@ jobs:
             Start-Sleep -Seconds 1
             try { $r = Invoke-RestMethod "http://127.0.0.1:47699/ping"; $ok = ($r.app -eq "aiuta") } catch {}
           }
+          if (-not $ok) {
+            Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+            if (Test-Path "$env:AIUTA_HOME\aiuta.log") { Get-Content "$env:AIUTA_HOME\aiuta.log" }
+            throw "Aiuta.exe did not start"
+          }
           $key = Get-Content "$env:AIUTA_HOME\key.txt"
           $ui = Invoke-RestMethod "http://127.0.0.1:47699/api/ui" -Headers @{ "X-Aiuta-Key" = $key }
           Stop-Process -Id $p.Id -Force
-          if (-not $ok) { throw "Aiuta.exe did not start" }
           if (-not $ui.ui.talk) { throw "Aiuta.exe started but the language files are missing" }
           Write-Host "Aiuta.exe started and says: $($ui.ui.talk)"
 
