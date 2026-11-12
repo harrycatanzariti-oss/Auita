@@ -160,16 +160,10 @@ python -m aiuta try "email Mary about lunch" # test a phrase, without opening an
 
 ### Releasing a new version
 
-```bash
-git tag v0.2.0
-```
-
-```bash
-git push origin v0.2.0
-```
-
-GitHub builds the installer on Windows and attaches `Aiuta-Setup.exe` to the
-release.
+On GitHub: **Actions** → **Windows installer** → **Run workflow**, type the
+version (e.g. `0.3.0`), and press **Run workflow**. GitHub builds and tests
+the installer on Windows and publishes a release with `Aiuta-Setup.exe`.
+Pushing a tag like `v0.3.0` does the same.
 
 ## License and business model
 

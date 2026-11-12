@@ -2,8 +2,9 @@ name: Windows installer
 
 # Builds Aiuta-Setup.exe on a Windows machine in GitHub's cloud.
 # - Every push: runs the tests and builds the installer (download it from the run's "Artifacts").
-# - Pushing a tag like v0.2.0: also attaches the installer to a GitHub Release, so there's
-#   one stable download link to send to family.
+# - To release: Actions tab -> "Windows installer" -> "Run workflow", type a version
+#   (e.g. 0.2.0). It builds, tests, and publishes a GitHub Release with Aiuta-Setup.exe,
+#   so there's one stable download link to send to family. Pushing a v* tag does the same.
 
 on:
   push:
@@ -11,6 +12,11 @@ on:
     tags: ["v*"]
   pull_request:
   workflow_dispatch:
+    inputs:
+      release:
+        description: "Make a release with this version number (e.g. 0.2.0). Leave empty to just build."
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -37,7 +43,9 @@ jobs:
         id: version
         shell: bash
         run: |
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+          if [[ -n "${{ github.event.inputs.release }}" ]]; then
+            echo "version=${{ github.event.inputs.release }}" >> "$GITHUB_OUTPUT"
+          elif [[ "$GITHUB_REF" == refs/tags/v* ]]; then
             echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
           else
             echo "version=$(python -c "import aiuta; print(aiuta.__version__)")" >> "$GITHUB_OUTPUT"
@@ -95,8 +103,11 @@ jobs:
           path: dist/Aiuta-Setup.exe
 
       - name: Attach to the release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.release != ''
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.event.inputs.release != '' && format('v{0}', github.event.inputs.release) || github.ref_name }}
+          name: ${{ github.event.inputs.release != '' && format('Aiuta {0}', github.event.inputs.release) || github.ref_name }}
+          target_commitish: ${{ github.sha }}
           files: dist/Aiuta-Setup.exe
           generate_release_notes: true
