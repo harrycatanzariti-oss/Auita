@@ -4,16 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aiuta"
-version = "0.1.0"
-description = "A voice helper that opens the things an older person uses on their computer."
+dynamic = ["version"]
+description = "A voice helper that takes an older person where they need to go on their computer."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { file = "LICENSE" }
-dependencies = [
-  "vosk>=0.3.45",
-  "sounddevice>=0.4",
-  "pyttsx3>=2.90",
-]
+# The free version needs nothing beyond Python itself.
+dependencies = []
 
 [project.optional-dependencies]
 ai = ["anthropic"]
@@ -25,5 +22,8 @@ aiuta = "aiuta.__main__:main"
 [tool.setuptools]
 packages = ["aiuta"]
 
+[tool.setuptools.dynamic]
+version = { attr = "aiuta.__version__" }
+
 [tool.setuptools.package-data]
-aiuta = ["setup.html"]
+aiuta = ["web/*", "locales/*.json"]

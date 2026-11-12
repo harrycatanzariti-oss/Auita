@@ -1,0 +1,97 @@
+name: Windows installer
+
+# Builds Aiuta-Setup.exe on a Windows machine in GitHub's cloud.
+# - Every push: runs the tests and builds the installer (download it from the run's "Artifacts").
+# - Pushing a tag like v0.2.0: also attaches the installer to a GitHub Release, so there's
+#   one stable download link to send to family.
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller pytest anthropic
+
+      - name: Run the tests
+        run: python -m pytest -q
+
+      - name: Work out the version
+        id: version
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=$(python -c "import aiuta; print(aiuta.__version__)")" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build Aiuta.exe
+        run: >
+          pyinstaller --noconfirm --clean --windowed --onedir
+          --name Aiuta
+          --icon installer/aiuta.ico
+          --add-data "aiuta/web;aiuta/web"
+          --add-data "aiuta/locales;aiuta/locales"
+          --hidden-import aiuta.assistant
+          --collect-submodules anthropic
+          installer/aiuta_entry.py
+
+      - name: Check Aiuta.exe starts and answers
+        shell: pwsh
+        run: |
+          $env:AIUTA_HOME = "$env:RUNNER_TEMP\aiuta-home"
+          $env:AIUTA_PORT = "47699"
+          $env:AIUTA_NO_WINDOW = "1"   # only start the server on the build machine
+          $p = Start-Process -FilePath "dist\Aiuta\Aiuta.exe" -PassThru
+          $ok = $false
+          for ($i = 0; $i -lt 30 -and -not $ok; $i++) {
+            Start-Sleep -Seconds 1
+            try { $r = Invoke-RestMethod "http://127.0.0.1:47699/ping"; $ok = ($r.app -eq "aiuta") } catch {}
+          }
+          $key = Get-Content "$env:AIUTA_HOME\key.txt"
+          $ui = Invoke-RestMethod "http://127.0.0.1:47699/api/ui" -Headers @{ "X-Aiuta-Key" = $key }
+          Stop-Process -Id $p.Id -Force
+          if (-not $ok) { throw "Aiuta.exe did not start" }
+          if (-not $ui.ui.talk) { throw "Aiuta.exe started but the language files are missing" }
+          Write-Host "Aiuta.exe started and says: $($ui.ui.talk)"
+
+      - name: Install Inno Setup (if this machine doesn't have it)
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) {
+            choco install innosetup -y --no-progress
+          }
+
+      - name: Build Aiuta-Setup.exe
+        shell: pwsh
+        run: '& "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /DAppVersion=${{ steps.version.outputs.version }} installer\aiuta.iss'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Aiuta-Setup
+          path: dist/Aiuta-Setup.exe
+
+      - name: Attach to the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/Aiuta-Setup.exe
+          generate_release_notes: true

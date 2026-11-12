@@ -13,11 +13,16 @@ anyone who shares or hosts a modified version.
 
 - **It's simple for the older person.** One button, big text, plain words.
   If it needs explaining, it's probably too complicated.
-- **The free version stays free and offline.** Nothing in the core may need
-  an account, a subscription or the internet. Paid or online things (like
-  the AI helper) must be optional and switched off by default.
-- **It's safe.** Aiuta only opens what a family member set up. Don't add
-  anything that types, clicks, deletes, pays or installs on its own.
+- **The free version stays free.** Nothing in the core may need an account
+  or a subscription. Paid things (like the AI helper) must be optional and
+  switched off by default.
+- **Reuse what the computer already has.** Speech, voices and apps come from
+  Windows and Edge; don't add heavy downloads.
+- **It takes them there; they do the rest.** Aiuta opens the right screen
+  (a new email to Mary, a search, a chat). Don't add anything that sends,
+  clicks, deletes, pays or installs on its own.
+- **Every word is translatable.** Text the person sees or says goes in
+  `aiuta/locales/*.json`, never in the code.
 - **It's tested.** Run `python -m pytest` and add a test for your change.
 
 ## Contributor agreement
@@ -37,5 +42,13 @@ You keep the copyright to your own work.
 python -m venv .venv
 .venv/bin/pip install -e ".[dev]"
 .venv/bin/python -m pytest
-.venv/bin/python -m aiuta try "open my email"
+.venv/bin/python -m aiuta try "email Mary about lunch"
 ```
+
+## Adding a language
+
+Copy `aiuta/locales/en.json` to your language's two-letter code (e.g.
+`es.json`) and translate it. Write the `filler`, `builtins`,
+`contact_intents` and `query_intents` sections the way people really talk
+in that language. Add a few of your own sentences to `tests/test_core.py`,
+like the Italian ones, and run `python -m pytest`.

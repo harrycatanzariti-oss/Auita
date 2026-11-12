@@ -1,3 +1,3 @@
-"""Aiuta: a voice helper that opens the things an older person uses on their computer."""
+"""Aiuta: a voice helper that takes an older person where they need to go on their computer."""
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

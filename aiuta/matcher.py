@@ -3,6 +3,7 @@
 Speech recognition is imperfect and people say things many ways ("open my
 email", "can you show me the emails please", "e-mail"), so we strip filler
 words and compare fuzzily. No AI, no internet: this runs on any old computer.
+The filler words and built-in phrases come from the language file.
 """
 from __future__ import annotations
 
@@ -10,34 +11,19 @@ import re
 from dataclasses import dataclass
 from difflib import SequenceMatcher
 
-FILLER = {
-    "please", "can", "could", "would", "you", "i", "want", "to", "wanna", "like",
-    "open", "show", "me", "my", "the", "a", "an", "go", "take", "start", "put",
-    "on", "up", "get", "bring", "launch", "run", "let", "lets", "let's", "do",
-    "now", "for", "into", "in", "of", "just", "help", "need", "some", "pull",
-    "turn", "load", "find", "see", "look", "at", "is", "there", "where",
-    "hey", "ok", "okay", "um", "uh", "so", "and", "then", "thanks", "thank",
-}
-
-BUILTINS = {
-    "list": ["what can i say", "what can you do", "help me", "options", "list",
-             "what are my options", "help"],
-    "time": ["what time is it", "time", "what's the time", "tell me the time"],
-    "date": ["what day is it", "what's the date", "date", "today's date", "what is today"],
-    "yes": ["yes", "yeah", "yep", "correct", "that's right", "si", "sì", "ok do it"],
-    "no": ["no", "nope", "wrong", "not that", "cancel", "stop", "never mind"],
-}
+from .i18n import Locale
 
 
 def normalize(text: str) -> str:
     text = text.lower().replace("e-mail", "email").replace("’", "'")
-    text = re.sub(r"[^a-z0-9à-ÿ' ]+", " ", text)
+    text = re.sub(r"[^\w' ]+", " ", text)
+    text = text.replace("_", " ")
     return re.sub(r"\s+", " ", text).strip()
 
 
-def core_words(text: str) -> list[str]:
+def core_words(text: str, filler: set[str]) -> list[str]:
     words = normalize(text).split()
-    kept = [w for w in words if w not in FILLER]
+    kept = [w for w in words if w not in filler]
     return kept or words
 
 
@@ -45,9 +31,9 @@ def _singular(w: str) -> str:
     return w[:-1] if len(w) > 3 and w.endswith("s") and not w.endswith("ss") else w
 
 
-def similarity(said: str, phrase: str) -> float:
-    a = core_words(said)
-    b = core_words(phrase)
+def similarity(said: str, phrase: str, filler: set[str]) -> float:
+    a = core_words(said, filler)
+    b = core_words(phrase, filler)
     if not a or not b:
         return 0.0
     sa, sb = " ".join(map(_singular, a)), " ".join(map(_singular, b))
@@ -73,30 +59,31 @@ class Match:
     shortcut: dict | None = None
 
 
-def best_match(said: str, shortcuts: list[dict], include_builtins: bool = True) -> Match:
+def best_match(said: str, shortcuts: list[dict], loc: Locale) -> Match:
     best = Match("none")
-    if include_builtins:
-        for name, phrases in BUILTINS.items():
-            if name in ("yes", "no"):
-                continue  # only meaningful when answering a question
-            for p in phrases:
-                s = 1.0 if normalize(said) == normalize(p) else similarity(said, p) * 0.95
-                if s > best.score:
-                    best = Match("builtin", name, s)
+    norm = normalize(said)
+    for name, phrases in loc.data["builtins"].items():
+        if name in ("yes", "no"):
+            continue  # only meaningful when answering a question
+        for p in phrases:
+            s = 1.0 if norm == normalize(p) else similarity(said, p, loc.filler) * 0.95
+            if s > best.score:
+                best = Match("builtin", name, s)
     for sc in shortcuts:
         for p in sc.get("phrases") or [sc["name"]]:
-            s = similarity(said, p)
+            s = similarity(said, p, loc.filler)
             if s > best.score:
                 best = Match("shortcut", sc["name"], s, sc)
     return best
 
 
-def yes_or_no(said: str) -> str | None:
+def yes_or_no(said: str, loc: Locale) -> str | None:
     norm = normalize(said)
     scores = {}
     for name in ("yes", "no"):
         scores[name] = max(
-            1.0 if norm == normalize(p) else similarity(said, p) for p in BUILTINS[name]
+            1.0 if norm == normalize(p) else similarity(said, p, loc.filler)
+            for p in loc.data["builtins"][name]
         )
     top = max(scores, key=scores.get)
     return top if scores[top] >= 0.75 else None

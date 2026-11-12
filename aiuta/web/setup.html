@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/icon.png">
+<title>Aiuta Setup</title>
+<style>
+  :root { --bg:#faf7f2; --card:#fff; --ink:#1f2328; --muted:#5d6670; --line:#e3ddd3; --accent:#1d6b57; --bad:#b3261e; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#16181b; --card:#1f2226; --ink:#eceff1; --muted:#a3abb3; --line:#33383e; --accent:#5cc2a6; --bad:#ff8a80; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:17px/1.5 "Segoe UI", system-ui, sans-serif; }
+  main { max-width:880px; margin:0 auto; padding:20px 16px 0; }
+  a.back { color:var(--muted); font-size:15px; }
+  h1 { font-size:28px; margin:8px 0 4px; } h2 { font-size:21px; margin:30px 0 4px; }
+  p.lead, p.hint { color:var(--muted); margin:0 0 12px; } p.hint { font-size:15px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; margin:12px 0; }
+  label { display:block; font-size:14px; color:var(--muted); margin:10px 0 4px; }
+  label.check { display:flex; gap:8px; align-items:center; font-size:16px; color:var(--ink); }
+  input:not([type=checkbox]), select { width:100%; font:inherit; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--ink); }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:0 14px; }
+  @media (max-width:640px){ .row { grid-template-columns:1fr; } }
+  button { font:inherit; padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; padding:10px 22px; }
+  button.danger { color:var(--bad); }
+  .actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .sticky { position:sticky; bottom:0; background:var(--bg); padding:12px 0 16px; margin-top:24px; border-top:1px solid var(--line); display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+  #msg { color:var(--muted); } #msg.bad { color:var(--bad); }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" id="back" href="#" data-t="back"></a>
+  <h1 data-t="title"></h1>
+  <p class="lead" data-t="intro"></p>
+
+  <h2 data-t="about_them"></h2>
+  <div class="card">
+    <div class="row">
+      <div><label for="person" data-t="their_name"></label><input id="person"></div>
+      <div><label for="helper" data-t="your_name"></label><input id="helper"></div>
+      <div><label for="language" data-t="language"></label><select id="language"></select></div>
+      <div><label for="emailService" data-t="email_service"></label>
+        <select id="emailService">
+          <option value="gmail" data-t="email_gmail"></option>
+          <option value="outlook" data-t="email_outlook"></option>
+          <option value="mailto" data-t="email_app"></option>
+        </select></div>
+      <div><label for="messaging" data-t="messaging"></label>
+        <select id="messaging">
+          <option value="whatsapp_app" data-t="wa_app"></option>
+          <option value="whatsapp_web" data-t="wa_web"></option>
+        </select></div>
+    </div>
+    <label class="check"><input type="checkbox" id="speak"> <span data-t="speak"></span></label>
+  </div>
+
+  <h2 data-t="people"></h2>
+  <p class="hint" data-t="people_intro"></p>
+  <div id="people"></div>
+  <div class="actions"><button id="addPerson" data-t="add_person"></button></div>
+
+  <h2 data-t="shortcuts"></h2>
+  <p class="hint" data-t="shortcuts_intro"></p>
+  <div id="shortcuts"></div>
+  <div class="actions"><button id="addShortcut" data-t="add"></button></div>
+
+  <h2 data-t="ai_title"></h2>
+  <div class="card">
+    <label class="check"><input type="checkbox" id="ai"> <span data-t="ai_enable"></span></label>
+    <p class="hint" data-t="ai_hint"></p>
+    <div class="row">
+      <div><label for="key" data-t="api_key"></label><input id="key" type="password" autocomplete="off"></div>
+      <div><label for="model" data-t="model"></label><input id="model"></div>
+    </div>
+  </div>
+
+  <div class="sticky"><button class="primary" id="save" data-t="save"></button><span id="msg" role="status"></span></div>
+</main>
+
+<template id="personTpl">
+  <div class="card">
+    <div class="row">
+      <div><label data-t="person_name"></label><input class="name"></div>
+      <div><label data-t="nicknames"></label><input class="nicknames" data-ph="nicknames_ph"></div>
+      <div><label data-t="email"></label><input class="email" type="email"></div>
+      <div><label data-t="phone"></label><input class="phone" type="tel" data-ph="phone_ph"></div>
+    </div>
+    <label data-t="call_link"></label><input class="call_link" data-ph="call_link_ph">
+    <div class="actions">
+      <button class="tryEmail"><span data-t="try"></span>: ✉</button>
+      <button class="tryCall"><span data-t="try"></span>: ☎</button>
+      <button class="danger remove" data-t="remove"></button>
+    </div>
+  </div>
+</template>
+
+<template id="shortcutTpl">
+  <div class="card">
+    <div class="row">
+      <div><label data-t="what_they_say"></label><input class="name"></div>
+      <div><label data-t="what_it_does"></label>
+        <select class="action">
+          <option value="open_website" data-t="act_open_website"></option>
+          <option value="open_app" data-t="act_open_app"></option>
+          <option value="open_link" data-t="act_open_link"></option>
+          <option value="call" data-t="act_call"></option>
+          <option value="open_folder" data-t="act_open_folder"></option>
+          <option value="open_file" data-t="act_open_file"></option>
+          <option value="say" data-t="act_say"></option>
+          <option value="remote_help" data-t="act_remote_help"></option>
+        </select></div>
+    </div>
+    <label data-t="target"></label><input class="target">
+    <label data-t="phrases"></label><input class="phrases" data-ph="phrases_ph">
+    <label data-t="reply"></label><input class="reply" data-ph="reply_ph">
+    <div class="actions"><button class="try" data-t="try"></button><button class="danger remove" data-t="remove"></button></div>
+  </div>
+</template>
+
+<script>
+const KEY = new URLSearchParams(location.search).get("key") || "";
+const $ = (s, el = document) => el.querySelector(s);
+let cfg = {}, T = {};
+
+function translate(root) {
+  root.querySelectorAll("[data-t]").forEach(el => { if (T[el.dataset.t]) el.textContent = T[el.dataset.t]; });
+  root.querySelectorAll("[data-ph]").forEach(el => { if (T[el.dataset.ph]) el.placeholder = T[el.dataset.ph]; });
+}
+function say(text, bad = false) { const m = $("#msg"); m.textContent = text; m.className = bad ? "bad" : ""; }
+const list = (s) => s.split(",").map(x => x.trim()).filter(Boolean);
+
+async function api(path, body) {
+  const opts = { headers: { "X-Aiuta-Key": KEY } };
+  if (body !== undefined) { opts.method = "POST"; opts.headers["Content-Type"] = "application/json"; opts.body = JSON.stringify(body); }
+  const r = await fetch(path, opts);
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) { say(j.error || T.error || "Error", true); throw new Error(j.error); }
+  return j;
+}
+
+function addPerson(p = {}) {
+  const el = $("#personTpl").content.firstElementChild.cloneNode(true);
+  translate(el);
+  $(".name", el).value = p.name || "";
+  $(".nicknames", el).value = (p.nicknames || []).join(", ");
+  $(".email", el).value = p.email || "";
+  $(".phone", el).value = p.phone ? "+" + p.phone : "";
+  $(".call_link", el).value = p.call_link || "";
+  $(".remove", el).onclick = () => el.remove();
+  $(".tryEmail", el).onclick = () => api("/api/test", { kind: "contact", how: "email", item: readPerson(el) }).then(r => say(r.reply));
+  $(".tryCall", el).onclick = () => api("/api/test", { kind: "contact", how: "call", item: readPerson(el) }).then(r => say(r.reply));
+  $("#people").appendChild(el);
+}
+function readPerson(el) {
+  return { name: $(".name", el).value, nicknames: list($(".nicknames", el).value), email: $(".email", el).value,
+           phone: $(".phone", el).value, call_link: $(".call_link", el).value };
+}
+
+function addShortcut(sc = {}) {
+  const el = $("#shortcutTpl").content.firstElementChild.cloneNode(true);
+  translate(el);
+  $(".name", el).value = sc.name || "";
+  $(".action", el).value = sc.action || "open_website";
+  $(".target", el).value = sc.target || "";
+  $(".phrases", el).value = (sc.phrases || []).filter(p => p.toLowerCase() !== (sc.name || "").toLowerCase()).join(", ");
+  $(".reply", el).value = sc.reply || "";
+  $(".remove", el).onclick = () => el.remove();
+  $(".try", el).onclick = () => api("/api/test", { kind: "shortcut", item: readShortcut(el) }).then(r => say(r.reply));
+  $("#shortcuts").appendChild(el);
+}
+function readShortcut(el) {
+  return { name: $(".name", el).value, action: $(".action", el).value, target: $(".target", el).value,
+           phrases: list($(".phrases", el).value), reply: $(".reply", el).value };
+}
+
+async function load() {
+  let data;
+  try { data = await api("/api/config"); }
+  catch (e) { document.body.textContent = "Please open this page from Aiuta (the Setup link)."; return; }
+  cfg = data.config; T = data.setup;
+  document.documentElement.lang = cfg.language;
+  translate(document);
+  const langSel = $("#language");
+  for (const [code, name] of Object.entries(data.languages)) langSel.add(new Option(name, code));
+  langSel.value = cfg.language;
+  $("#person").value = cfg.person_name; $("#helper").value = cfg.helper_name;
+  $("#speak").checked = cfg.speak_replies;
+  $("#emailService").value = cfg.email_service; $("#messaging").value = cfg.messaging;
+  $("#ai").checked = cfg.ai.enabled; $("#key").value = cfg.ai.api_key || ""; $("#model").value = cfg.ai.model;
+  cfg.contacts.forEach(addPerson);
+  cfg.shortcuts.forEach(addShortcut);
+  $("#back").href = "/?key=" + encodeURIComponent(KEY);
+}
+
+$("#addPerson").onclick = () => addPerson();
+$("#addShortcut").onclick = () => addShortcut();
+$("#save").onclick = async () => {
+  const body = { ...cfg,
+    person_name: $("#person").value, helper_name: $("#helper").value, language: $("#language").value,
+    speak_replies: $("#speak").checked, email_service: $("#emailService").value, messaging: $("#messaging").value,
+    ai: { ...cfg.ai, enabled: $("#ai").checked, api_key: $("#key").value, model: $("#model").value },
+    contacts: [...$("#people").children].map(readPerson).filter(p => p.name),
+    shortcuts: [...$("#shortcuts").children].map(readShortcut).filter(s => s.name || s.target) };
+  const languageChanged = body.language !== cfg.language;
+  await api("/api/config", body);
+  if (languageChanged) { location.reload(); return; }
+  cfg = body;
+  say(T.saved);
+};
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/icon.png">
+<title>Aiuta</title>
+<style>
+  :root {
+    --bg: #fbf8f3; --card: #ffffff; --ink: #14181c; --muted: #4f5862; --line: #d9d2c6;
+    --go: #1d6b57; --go-dark: #154f40; --listen: #c0570a; --focus: #1a4fd6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); }
+  body { font: 22px/1.4 "Segoe UI", system-ui, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+  main { flex: 1; max-width: 980px; width: 100%; margin: 0 auto; padding: 24px 20px 12px; text-align: center; }
+  h1 { font-size: 30px; font-weight: 600; margin: 0 0 18px; color: var(--muted); }
+
+  #talk {
+    width: 230px; height: 230px; border-radius: 50%; border: none; cursor: pointer;
+    background: var(--go); color: #fff; display: inline-flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 10px 30px rgba(29, 107, 87, .35); transition: transform .1s, background .2s;
+  }
+  #talk:hover { background: var(--go-dark); }
+  #talk:active { transform: scale(.97); }
+  #talk:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible { outline: 4px solid var(--focus); outline-offset: 4px; }
+  #talk svg { width: 84px; height: 84px; }
+  #talk span { font-size: 26px; font-weight: 700; }
+  #talk.listening { background: var(--listen); box-shadow: 0 0 0 0 rgba(192, 87, 10, .6); animation: pulse 1.4s infinite; }
+  #talk.thinking { background: #6b7280; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(192,87,10,.55);} 70% { box-shadow: 0 0 0 34px rgba(192,87,10,0);} 100% { box-shadow: 0 0 0 0 rgba(192,87,10,0);} }
+
+  #reply { font-size: 32px; font-weight: 600; margin: 26px auto 6px; max-width: 820px; min-height: 1.4em; }
+  #heard { font-size: 21px; color: var(--muted); min-height: 1.4em; margin: 0 auto; max-width: 820px; }
+
+  #yesno { display: none; gap: 20px; justify-content: center; margin: 18px 0 0; }
+  #yesno.show { display: flex; }
+  #yesno button { font: inherit; font-size: 30px; font-weight: 700; min-width: 170px; padding: 16px 28px; border-radius: 16px; cursor: pointer; border: 3px solid var(--ink); background: var(--card); color: var(--ink); }
+  #yesno button.yes { background: var(--go); border-color: var(--go); color: #fff; }
+
+  #setupNow { display: none; margin: 24px auto 0; }
+  #setupNow.show { display: block; }
+  #setupNow a { display: inline-block; font-weight: 700; color: #fff; background: var(--go); padding: 14px 26px; border-radius: 14px; text-decoration: none; margin-top: 10px; }
+
+  .label { font-size: 20px; color: var(--muted); margin: 34px 0 12px; }
+  #tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+  #tiles button {
+    font: inherit; font-size: 25px; font-weight: 600; min-height: 92px; padding: 12px; border-radius: 16px;
+    background: var(--card); color: var(--ink); border: 2px solid var(--line); cursor: pointer;
+  }
+  #tiles button:hover { border-color: var(--go); background: #f1f8f5; }
+
+  form { display: flex; gap: 10px; max-width: 620px; margin: 30px auto 0; }
+  form input { flex: 1; font: inherit; font-size: 20px; padding: 10px 14px; border: 2px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink); min-width: 0; }
+  form button { font: inherit; font-size: 20px; font-weight: 600; padding: 10px 20px; border-radius: 12px; border: 2px solid var(--go); background: var(--card); color: var(--go); cursor: pointer; }
+
+  footer { text-align: right; padding: 10px 18px 14px; }
+  footer a { font-size: 15px; color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1 id="hello"></h1>
+
+  <button id="talk" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4"/><path d="M8 21h8"/>
+    </svg>
+    <span id="talkLabel"></span>
+  </button>
+
+  <p id="reply" role="status" aria-live="polite"></p>
+  <p id="heard"></p>
+
+  <div id="yesno">
+    <button class="yes" id="yes" type="button"></button>
+    <button class="no" id="no" type="button"></button>
+  </div>
+
+  <div id="setupNow"><div id="notSetUp"></div><a id="setupNowLink" href="#"></a></div>
+
+  <div id="tileArea">
+    <p class="label" id="orPress"></p>
+    <div id="tiles"></div>
+  </div>
+
+  <form id="typeForm" autocomplete="off">
+    <input id="typeBox" aria-label="Type here">
+    <button id="go" type="submit"></button>
+  </form>
+</main>
+<footer><a id="setupLink" href="#"></a></footer>
+
+<script>
+const KEY = new URLSearchParams(location.search).get("key") || "";
+const $ = (id) => document.getElementById(id);
+const fill = (s, vars) => s.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
+let info = null, ui = {}, speechLang = "en-US", voice = null, recognizing = false;
+
+async function api(path, body) {
+  const opts = { headers: { "X-Aiuta-Key": KEY } };
+  if (body !== undefined) { opts.method = "POST"; opts.headers["Content-Type"] = "application/json"; opts.body = JSON.stringify(body); }
+  const r = await fetch(path, opts);
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}
+
+// ---- talking (the computer's own voices, via the browser) ----
+function pickVoice() {
+  const voices = speechSynthesis.getVoices();
+  const base = speechLang.slice(0, 2).toLowerCase();
+  const mine = voices.filter(v => v.lang.toLowerCase().startsWith(base));
+  const exact = mine.filter(v => v.lang.toLowerCase() === speechLang.toLowerCase());
+  const nice = (list) => list.find(v => /natural|online|neural/i.test(v.name));
+  voice = nice(exact) || nice(mine) || exact[0] || mine[0] || null;
+}
+function say(text) {
+  if (!info || !info.speak_replies || !text || !("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = speechLang; u.rate = 0.92;
+  if (voice) u.voice = voice;
+  speechSynthesis.speak(u);
+}
+
+function show(reply, heard = "", question = false) {
+  $("reply").textContent = reply;
+  $("heard").textContent = heard ? fill(ui.you_said, { text: heard }) : "";
+  $("yesno").classList.toggle("show", question);
+}
+function setTalk(state) {
+  const b = $("talk");
+  b.classList.toggle("listening", state === "listening");
+  b.classList.toggle("thinking", state === "thinking");
+  $("talkLabel").textContent = state === "listening" ? ui.listening : state === "thinking" ? ui.thinking : ui.talk;
+}
+
+async function send(text) {
+  setTalk("thinking");
+  try {
+    const r = await api("/api/hear", { text });
+    show(r.reply, text, !!r.question);
+    say(r.reply);
+  } catch (e) { show(ui.no_internet); }
+  setTalk("idle");
+}
+async function tile(t) {
+  try { const r = await api("/api/tile", { kind: t.kind, name: t.name }); show(r.reply); say(r.reply); }
+  catch (e) { show(ui.no_internet); }
+}
+
+// ---- listening (the speech recognition built into Microsoft Edge) ----
+const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+function listen() {
+  if (recognizing) return;
+  if (!Recognition) { show(ui.no_speech); $("typeBox").focus(); return; }
+  if ("speechSynthesis" in window) speechSynthesis.cancel(); // don't hear ourselves
+  const rec = new Recognition();
+  rec.lang = speechLang; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
+  let finalText = "", problem = "";
+  rec.onstart = () => { recognizing = true; setTalk("listening"); show(ui.listening, "", $("yesno").classList.contains("show")); };
+  rec.onresult = (e) => {
+    let interim = "";
+    for (const res of e.results) { if (res.isFinal) finalText = res[0].transcript; else interim += res[0].transcript; }
+    $("heard").textContent = finalText || interim;
+  };
+  rec.onerror = (e) => {
+    if (e.error === "not-allowed" || e.error === "service-not-allowed" || e.error === "audio-capture") problem = fill(ui.mic_blocked, { helper: info.helper_name });
+    else if (e.error === "network") problem = ui.no_internet;
+    else if (e.error === "no-speech") problem = ui.didnt_catch;
+  };
+  rec.onend = () => {
+    recognizing = false; setTalk("idle");
+    if (finalText.trim()) send(finalText.trim());
+    else { show(problem || ui.didnt_catch); say(problem || ui.didnt_catch); }
+  };
+  try { rec.start(); } catch (e) { recognizing = false; show(ui.no_speech); }
+}
+
+// ---- start ----
+async function init() {
+  try { info = await api("/api/ui"); }
+  catch (e) { document.body.textContent = "Please open Aiuta from its desktop icon."; return; }
+  ui = info.ui;
+  document.documentElement.lang = info.lang;
+  const nav = (navigator.language || "");
+  speechLang = nav.toLowerCase().startsWith(info.lang) ? nav : info.speech;
+  if ("speechSynthesis" in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+
+  $("hello").textContent = fill(ui.hello, { name: info.person_name });
+  $("talkLabel").textContent = ui.talk;
+  $("talk").setAttribute("aria-label", ui.talk);
+  $("yes").textContent = ui.yes; $("no").textContent = ui.no;
+  $("orPress").textContent = ui.or_press;
+  $("typeBox").placeholder = ui.type_here;
+  $("go").textContent = ui.go;
+  $("setupLink").textContent = ui.setup_link;
+  $("setupLink").href = $("setupNowLink").href = "/setup?key=" + encodeURIComponent(KEY);
+  $("notSetUp").textContent = ui.not_set_up_yet;
+  $("setupNowLink").textContent = ui.set_up_now;
+  $("setupNow").classList.toggle("show", !info.set_up);
+  show(ui.start_prompt);
+
+  const tiles = $("tiles"); tiles.innerHTML = "";
+  for (const t of info.tiles) {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = t.label; b.onclick = () => tile(t);
+    tiles.appendChild(b);
+  }
+  $("tileArea").style.display = info.tiles.length ? "" : "none";
+}
+
+$("talk").onclick = listen;
+$("yes").onclick = () => send(ui.yes);
+$("no").onclick = () => send(ui.no);
+$("typeForm").onsubmit = (e) => { e.preventDefault(); const t = $("typeBox").value.trim(); if (t) { $("typeBox").value = ""; send(t); } };
+document.addEventListener("keydown", (e) => {
+  if (e.target.tagName === "INPUT") return;
+  if (e.code === "Space") { e.preventDefault(); listen(); }
+});
+init();
+</script>
+</body>
+</html>

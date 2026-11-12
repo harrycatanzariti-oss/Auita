@@ -1,8 +1,24 @@
 {
   "person_name": "Nonno",
   "helper_name": "Harry",
+  "language": "en",
   "speak_replies": true,
-  "speech_model_path": "C:\\Aiuta\\vosk-model-small-en-us-0.15",
+  "email_service": "gmail",
+  "messaging": "whatsapp_app",
+  "contacts": [
+    {
+      "name": "Harry",
+      "nicknames": ["my grandson"],
+      "email": "harry@example.com",
+      "phone": "+61 412 345 678"
+    },
+    {
+      "name": "Mary",
+      "nicknames": ["my daughter", "Maria"],
+      "email": "mary@example.com",
+      "phone": "+61 400 111 222"
+    }
+  ],
   "shortcuts": [
     {
       "name": "Email",
@@ -12,16 +28,9 @@
       "reply": "Here are your emails."
     },
     {
-      "name": "Video call Harry",
-      "action": "call",
-      "target": "whatsapp://",
-      "phrases": ["call Harry", "ring Harry", "talk to Harry"],
-      "reply": "Opening WhatsApp. Press Harry's name, then the camera."
-    },
-    {
       "name": "Photos",
-      "action": "open_folder",
-      "target": "C:\\Users\\Nonno\\Pictures",
+      "action": "open_link",
+      "target": "ms-photos:",
       "phrases": ["pictures", "the grandkids", "family photos"]
     },
     {
@@ -32,8 +41,8 @@
     },
     {
       "name": "Solitaire",
-      "action": "open_app",
-      "target": "C:\\Program Files\\WindowsApps\\Solitaire\\Solitaire.exe",
+      "action": "open_link",
+      "target": "ms-solitaire:",
       "phrases": ["cards", "play cards", "my game"]
     },
     {

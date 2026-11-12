@@ -2,159 +2,174 @@
 
 *From the Italian **aiutare**, "to help".*
 
-Aiuta is a voice helper for older people who find computers hard. They press
-one big button and say what they want — *"open my email"*, *"call Harry"*,
-*"show me the photos"*, *"I'm stuck"* — and Aiuta opens it for them.
+Aiuta takes an older person where they need to go on their computer, by
+voice. They press one big button and say what they want, and Aiuta opens the
+right screen, ready to use:
 
-A family member sets it up once, choosing the handful of things their
-parent or grandparent actually uses. They can do this sitting next to them,
-or from the other side of the world over a remote-desktop connection.
-
-- **Free and offline.** Speech recognition runs on the computer itself. No
-  account, no subscription, no internet needed, and it runs on old machines.
-- **Safe by design.** It only opens what the family set up. It never types,
-  clicks, deletes, pays or installs anything on its own.
-- **Forgiving.** It understands "emails", "e-mail", "can you show me my mail
-  please". When it isn't sure, it asks *"Did you mean Email?"* and shows big
-  Yes / No buttons.
-- **Optional AI helper (paid).** Switch it on and they can talk naturally and
-  ask questions ("what's a good recipe for ragù?"). It still can only open
-  the family's shortcuts, and it warns about likely scams.
-
-## What they see
-
-One window: a large **Talk** button, a big line of text saying what's
-happening, and the reply read out loud. Space bar works too. There is a small
-**Setup (for family)** link in the corner.
-
-## Built-in phrases
-
-| They say | Aiuta does |
+| They say | Aiuta opens |
 |---|---|
-| "What can I say?" / "Help" | Reads out the list of shortcuts |
-| "What time is it?" | Tells the time |
-| "What day is it?" | Tells the date |
-| "Yes" / "No" (also "sì") | Answers a "Did you mean…?" question |
+| "Email Mary about Sunday lunch" | A new email to Mary, subject "Sunday lunch". They type and press Send. |
+| "Go on Google and search cheap flights to Rome" | Google results for "cheap flights to Rome" |
+| "Play Pavarotti on YouTube" | YouTube results for Pavarotti |
+| "How do I get to the hospital?" | The map, with directions |
+| "Call Mary" / "Message Mary" | Mary's WhatsApp chat (or her video-call link) |
+| "Open the photos" | The Photos app |
+| "What's the weather like?" | Today's weather |
+| "I'm stuck" | Remote help, so family can connect |
+| "What can I say?" | Reads out everything they can ask for |
 
-## What a shortcut can do
+Aiuta only takes them to the screen. It never sends, posts, buys, deletes
+or types anything by itself, so they stay in control.
 
-| Action | Target | Example |
-|---|---|---|
-| Open a website | a web address | Email → `https://mail.google.com` |
-| Open a program | path to the program (on Mac, the app name) | Solitaire |
-| Start a call | a call link: `whatsapp://`, `facetime:`, `skype:`, `tel:` | Call Harry |
-| Open a folder / file | a path | Photos → `C:\Users\Nonno\Pictures` |
-| Say something | the words | Pills → "The blue pill with breakfast." |
-| Remote help | path to RustDesk / TeamViewer QuickSupport / AnyDesk | "I'm stuck" |
+## Why it's different
 
-See [`examples/config.example.json`](examples/config.example.json) for a full
-example.
+- **Extremely simple.** One window: a huge **Press and talk** button, big
+  picture tiles ("Email", "Photos", "Call Mary") and big text. Replies are
+  read out loud. If it isn't sure, it asks *"Did you mean Photos?"* with big
+  Yes / No buttons.
+- **Free.** It uses the speech recognition and natural voices already
+  built into Microsoft Edge on every Windows 10 and 11 computer. There's
+  nothing to buy, no account and no voice software to download.
+- **Any language.** Everything Aiuta says or understands lives in one
+  translation file per language. English and Italian are done, and adding
+  another is a translation, not new code.
+- **Set up by family, from anywhere.** A family member adds the people and
+  shortcuts once, sitting next to them or over RustDesk or TeamViewer.
+- **Optional AI helper (paid).** Turn it on and they can talk freely and
+  ask questions. It can still only take them to the same places.
 
-## Set it up
+## Install on Windows (one click)
 
-### 1. Install (one time)
+1. Download **Aiuta-Setup.exe** from the
+   [latest release](https://github.com/harrycatanzariti-oss/Auita/releases/latest).
+2. Double-click it.
 
-You need [Python 3.9+](https://www.python.org/downloads/). On Windows, tick
-"Add Python to PATH" while installing.
+That's it. There are no questions and no administrator password. It puts an
+**Aiuta** icon on the desktop, starts with the computer, and opens straight
+away.
 
-```bash
-pip install aiuta
-```
+> **"Windows protected your PC"?** The installer isn't code-signed yet, so
+> Windows shows this the first time. Click **More info**, then **Run anyway**.
 
-Until it's published on PyPI, install it from a copy of this repo:
+### First time: set it up for them
 
-```bash
-pip install .
-```
+1. In Aiuta, click **Setup (for family)** in the bottom corner.
+2. Choose their language, email (Gmail / Outlook / the email program) and
+   WhatsApp.
+3. Add **People**: name, other names they use ("my daughter"), email, and
+   mobile number with country code.
+4. Check the **Shortcuts**. Email, Photos, News and Calculator are already
+   there. Add the websites and programs they use, and press **Try it** to check
+   each one.
+5. Click **Save**, then **Back to Aiuta**.
+6. Press the big button once and click **Allow** when Windows asks about the
+   microphone. It remembers this.
 
-### 2. Download a voice model (free, ~50 MB)
+### Setting it up from far away
 
-Pick the small model for their language from
-<https://alphacephei.com/vosk/models> (e.g. `vosk-model-small-en-us` for
-English or `vosk-model-small-it` for Italian), unzip it somewhere like
-`C:\Aiuta\`. You'll paste that folder's path into the setup page in step 3.
+Connect to their computer with **RustDesk** (free, recommended),
+**TeamViewer**, **AnyDesk** or **Chrome Remote Desktop**, then open
+**Aiuta setup (for family)** from the Start menu.
 
-### 3. Add their shortcuts
-
-```bash
-aiuta
-```
-
-Click **Setup (for family)** in the corner. A page opens in the browser where
-you add shortcuts, press **Try it** to check each one, then **Save**. The
-helper picks up the changes straight away.
-
-The settings are one file you can back up or copy to another computer:
-
-- Windows: `%APPDATA%\aiuta\config.json`
-- macOS: `~/Library/Application Support/aiuta/config.json`
-- Linux: `~/.config/aiuta/config.json`
-
-### 4. Start it when the computer starts
-
-- Windows: press Win+R, type `shell:startup`, and put a shortcut to `aiuta`
-  in that folder.
-- macOS: System Settings → General → Login Items → add it.
-
-## Setting it up from far away
-
-Aiuta works with whichever remote-desktop tool the family already uses:
-
-1. Connect to their computer with **RustDesk** (free and open source,
-   recommended), **TeamViewer**, **AnyDesk** or **Chrome Remote Desktop**.
-2. Click **Setup (for family)** on their screen and make your changes.
-
-To let *them* ask for help, add a **Remote help** shortcut pointing at the
+To let them ask for help, add a **Remote help** shortcut pointing at the
 remote-desktop program. When they say "I'm stuck", it opens and shows the
 code they read out to you on the phone.
 
-> **About TeamViewer:** it is only free for personal use, and it sometimes
-> flags regular family support as commercial use. RustDesk has no such limit,
-> which is why it's the default.
+> **About TeamViewer:** it's only free for personal use, and it sometimes
+> flags regular family support as commercial use. RustDesk has no such limit.
 
-The setup page is only reachable on that computer itself (127.0.0.1) and
-needs a secret key that is only shown there, so nobody on the internet or the
-home Wi-Fi can change it.
+## How it works
+
+```
+ Aiuta window (Edge, app mode)              Aiuta.exe (runs quietly in the background)
+ ┌────────────────────────────┐   words    ┌────────────────────────────────────────┐
+ │  Press and talk            │ ─────────► │ understands the request                │
+ │  (Edge speech recognition) │            │   "email Mary" → Gmail compose to Mary │
+ │                            │ ◄───────── │ opens it in their normal browser/app   │
+ │  reply read aloud          │   reply    │ (optional) asks the AI helper           │
+ └────────────────────────────┘            └────────────────────────────────────────┘
+```
+
+- **Hearing and speaking** use Microsoft Edge's built-in speech
+  recognition and voices. The Aiuta window is Edge in "app mode", with no
+  address bar or tabs, using its own separate profile so their normal
+  browsing is never touched. Edge's recognition uses Microsoft's online
+  service, so talking needs the internet. Without it they can still press
+  the tiles or type.
+- **Understanding** is done on the computer, for free. It forgives
+  mistakes ("e-mail", "marry" for Mary), strips filler ("can you please…"),
+  and picks out the person, the search words or the place.
+- **Privacy:** the setup and window only work on that computer (127.0.0.1)
+  and need a secret key, so no one on the internet or the home Wi-Fi can
+  reach them. Settings are one file:
+  `%APPDATA%\aiuta\config.json`.
 
 ## The AI helper (optional)
 
-1. `pip install "aiuta[ai]"`
-2. Get an API key from <https://console.anthropic.com>.
-3. In the setup page, tick **Let them talk naturally**, paste the key, and
-   save.
+In the setup page, tick **Let them talk naturally**, paste an Anthropic API
+key from <https://console.anthropic.com>, and save. The installer already
+includes everything it needs.
 
-The AI is only used when the free matcher isn't sure what they meant, so
-ordinary "open my email" requests stay free. It runs Claude at low effort
-with short replies to keep the cost down. You can change the model in the
-setup page; a smaller model such as `claude-haiku-5-5` costs much less per
-question. Without the internet, or if the key stops working, Aiuta carries on
-with the free behaviour.
+- The AI is only used when the free part doesn't understand, so everyday
+  requests stay free.
+- It can open the same things (shortcuts, searches, YouTube, the map, a new
+  email or chat with someone the family added), answer questions, and warn
+  about likely scams.
+- It uses Claude at low effort with short replies to keep costs down. You
+  can change the model in the setup page; `claude-haiku-5-5` costs much less
+  per question.
 
-## Try it without a microphone
+## Languages
 
-```bash
-python -m aiuta try "can you show me my emails"         # shows what it would do
-python -m aiuta try "can you show me my emails" --real  # actually opens it
-python -m aiuta setup                                   # just the setup page
-```
+Aiuta speaks **English** and **Italiano**. To add a language:
+
+1. Copy `aiuta/locales/en.json` to e.g. `aiuta/locales/es.json`.
+2. Translate the words. The `filler`, `builtins`, `contact_intents` and
+   `query_intents` sections are how people *say* things, so write them the
+   way people actually talk, not word for word.
+3. Run `python -m pytest`. It checks no keys are missing.
+4. Open a pull request.
+
+The installer already speaks English, Italian, Spanish, French, German,
+Portuguese, Dutch, Polish, Japanese and Ukrainian.
 
 ## For developers
 
-| File | What it does |
-|---|---|
-| `aiuta/matcher.py` | Works out which shortcut was meant (fuzzy, no AI). |
-| `aiuta/brain.py` | Turns what was said into a reply and an action. No UI, easy to test. |
-| `aiuta/actions.py` | Opens apps, websites, folders and calls on Windows, macOS and Linux. |
-| `aiuta/speech.py` | Offline listening (Vosk) and speaking (the computer's own voice). |
-| `aiuta/app.py` | The big-button window (Tkinter, included with Python). |
-| `aiuta/setup_server.py`, `setup.html` | The family setup page. |
-| `aiuta/assistant.py` | The optional AI helper. |
-| `aiuta/config.py` | Loads, checks and saves the settings file. |
+Runs anywhere with Python 3.9+ and Edge or Chrome (Windows, macOS, Linux):
 
 ```bash
 pip install -e ".[dev]"
 python -m pytest
+python -m aiuta                              # open Aiuta
+python -m aiuta try "email Mary about lunch" # test a phrase, without opening anything
 ```
+
+| File | What it does |
+|---|---|
+| `aiuta/intents.py` | Requests with something in them: email/message/call someone, search, YouTube, map. |
+| `aiuta/matcher.py` | Works out which shortcut was meant (fuzzy, no AI). |
+| `aiuta/brain.py` | Decides what to do with what was said, and what to reply. |
+| `aiuta/actions.py` | Opens apps, websites, folders and links on Windows, macOS and Linux. |
+| `aiuta/server.py` | The local server behind the window and the setup page. |
+| `aiuta/launcher.py` | What the desktop icon runs: starts the server and opens the window. |
+| `aiuta/web/` | The window (`index.html`) and the family setup page (`setup.html`). |
+| `aiuta/locales/` | One file per language. |
+| `aiuta/assistant.py` | The optional AI helper. |
+| `installer/` | The Windows installer (Inno Setup), icon and build entry point. |
+| `.github/workflows/windows.yml` | Tests and builds `Aiuta-Setup.exe` on every push. A tag like `v0.2.0` publishes a release. |
+
+### Releasing a new version
+
+```bash
+git tag v0.2.0
+```
+
+```bash
+git push origin v0.2.0
+```
+
+GitHub builds the installer on Windows and attaches `Aiuta-Setup.exe` to the
+release.
 
 ## License and business model
 
@@ -168,7 +183,7 @@ Aiuta is **source-available** under the [Aiuta Community License](LICENSE)
   support bundled with it) is allowed, but 10% of the revenue goes to the
   project.
 
-Because of the revenue share, it isn't "open source" in the official
+Because of the revenue share it isn't "open source" in the official
 [OSI](https://opensource.org/osd) sense, even though everyone can read and
 change the code.
 
