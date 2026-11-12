@@ -17,6 +17,18 @@ def _log_dir() -> Path:
 
 if __name__ == "__main__":
     try:
+        if sys.argv[1:2] == ["--check-screen"]:
+            # Used by the build check: can this Aiuta.exe read the screen?
+            from aiuta.agent.desktop import WindowsDesktop
+
+            screen = WindowsDesktop().read()
+            d = _log_dir()
+            d.mkdir(parents=True, exist_ok=True)
+            (d / "screen-check.txt").write_text(
+                f"{screen.title}\n{len(screen.elements)} elements\n{screen.describe()[:2000]}",
+                encoding="utf-8")
+            sys.exit(0)
+
         from aiuta.launcher import main
 
         main("setup" if sys.argv[1:2] == ["setup"] else "")

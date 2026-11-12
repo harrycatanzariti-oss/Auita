@@ -67,7 +67,7 @@ jobs:
           --add-data "aiuta/locales;aiuta/locales"
           --hidden-import aiuta.agent.nova
           --hidden-import aiuta.agent.claude
-          --collect-submodules uiautomation
+          --collect-all uiautomation
           --collect-submodules anthropic
           installer/aiuta_entry.py
 
@@ -93,6 +93,19 @@ jobs:
           Stop-Process -Id $p.Id -Force
           if (-not $ui.ui.talk) { throw "Aiuta.exe started but the language files are missing" }
           Write-Host "Aiuta.exe started and says: $($ui.ui.talk)"
+
+      - name: Check screen reading inside Aiuta.exe (Notepad)
+        continue-on-error: true   # build machines don't always have a usable desktop
+        shell: pwsh
+        run: |
+          $env:AIUTA_HOME = "$env:RUNNER_TEMP\aiuta-home"
+          $n = Start-Process notepad -PassThru
+          Start-Sleep -Seconds 3
+          $p = Start-Process -FilePath "dist\Aiuta\Aiuta.exe" -ArgumentList "--check-screen" -PassThru -Wait
+          Stop-Process -Id $n.Id -Force -ErrorAction SilentlyContinue
+          if (Test-Path "$env:AIUTA_HOME\aiuta.log") { Get-Content "$env:AIUTA_HOME\aiuta.log" }
+          Get-Content "$env:AIUTA_HOME\screen-check.txt"
+          if (-not (Select-String -Path "$env:AIUTA_HOME\screen-check.txt" -Pattern "Notepad" -Quiet)) { throw "Aiuta.exe could not read the screen" }
 
       - name: Install Inno Setup (if this machine doesn't have it)
         shell: pwsh
