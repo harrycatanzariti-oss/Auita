@@ -223,35 +223,6 @@ def test_italian_replies_and_builtins():
     assert b.hear("cosa posso dire").reply.startswith("Puoi dire: ")
 
 
-# ---- AI helper (no network: a fake stands in) ----------------------------------
-
-def test_ai_used_only_when_unsure():
-    class FakeAI:
-        calls = []
-
-        def handle(self, said, b):
-            self.calls.append(said)
-            return b.run_shortcut("Photos")
-
-    b = brain()
-    b.assistant = FakeAI()
-    assert b.hear("open my email").ran == "Email"
-    assert b.hear("search for pasta").ran
-    assert FakeAI.calls == []
-    assert b.hear("I'd love to look at the little ones from Christmas").ran == "Photos"
-    assert len(FakeAI.calls) == 1
-
-
-def test_ai_failure_falls_back():
-    class Broken:
-        def handle(self, said, b):
-            raise RuntimeError("no internet")
-
-    b = brain()
-    b.assistant = Broken()
-    assert "didn't understand" in b.hear("the cat sat quietly upstairs").reply
-
-
 def test_yes_or_no():
     en, it = i18n.get("en"), i18n.get("it")
     assert matcher.yes_or_no("yes please", en) == "yes"
@@ -319,13 +290,16 @@ def test_save_and_load_settings(server):
     data = json.loads(raw)
     assert "it" in data["languages"] and data["setup"]["save"] == "Save"
     cfg = data["config"]
-    cfg.update(person_name="Nonno Gino", language="it", ai={"enabled": False, "api_key": "sk-secret"})
+    cfg.update(person_name="Nonno Gino", language="it", plus={"api_key": "sk-secret"},
+               basic={"api_key": "bedrock-secret", "region": "ap-southeast-2"})
     assert call(server, "/api/config", cfg)[0] == 200
     got = json.loads(call(server, "/api/config")[1])
-    assert got["config"]["ai"]["api_key"] == MASK  # never sent back to the page
+    assert got["config"]["plus"]["api_key"] == MASK  # keys are never sent back to the page
+    assert got["config"]["basic"]["api_key"] == MASK
     assert got["setup"]["save"] == "Salva"
     call(server, "/api/config", got["config"])  # saving the masked value keeps the real key
-    assert config.load(server.cfg_path)["ai"]["api_key"] == "sk-secret"
+    saved = config.load(server.cfg_path)
+    assert saved["plus"]["api_key"] == "sk-secret" and saved["basic"]["api_key"] == "bedrock-secret"
     info = json.loads(call(server, "/api/ui")[1])
     assert info["lang"] == "it" and info["person_name"] == "Nonno Gino"
 

@@ -9,6 +9,7 @@ right screen, ready to use:
 | They say | Aiuta opens |
 |---|---|
 | "Email Mary about Sunday lunch" | A new email to Mary, subject "Sunday lunch". They type and press Send. |
+| "Email Mary saying I'll be late" | The same, with "I'll be late" already written in |
 | "Go on Google and search cheap flights to Rome" | Google results for "cheap flights to Rome" |
 | "Play Pavarotti on YouTube" | YouTube results for Pavarotti |
 | "How do I get to the hospital?" | The map, with directions |
@@ -18,8 +19,10 @@ right screen, ready to use:
 | "I'm stuck" | Remote help, so family can connect |
 | "What can I say?" | Reads out everything they can ask for |
 
-Aiuta only takes them to the screen. It never sends, posts, buys, deletes
-or types anything by itself, so they stay in control.
+On the **free plan** Aiuta takes them to the screen, and they press Send.
+On the **Basic** and **Plus** plans an AI agent does the whole task. It
+always asks *"Shall I send it?"* before anything that can't be undone (see
+[Plans](#plans)).
 
 ## Why it's different
 
@@ -35,8 +38,9 @@ or types anything by itself, so they stay in control.
   another is a translation, not new code.
 - **Set up by family, from anywhere.** A family member adds the people and
   shortcuts once, sitting next to them or over RustDesk or TeamViewer.
-- **Optional AI helper (paid).** Turn it on and they can talk freely and
-  ask questions. It can still only take them to the same places.
+- **An AI that does it for them, cheaply.** On the Basic plan, Amazon Nova
+  does the steps on screen ("email Mary that I'll be late" → written, checked,
+  sent once they say yes), at a fraction of a cent per task.
 
 ## Install on Windows (one click)
 
@@ -86,7 +90,7 @@ code they read out to you on the phone.
  │  Press and talk            │ ─────────► │ understands the request                │
  │  (Edge speech recognition) │            │   "email Mary" → Gmail compose to Mary │
  │                            │ ◄───────── │ opens it in their normal browser/app   │
- │  reply read aloud          │   reply    │ (optional) asks the AI helper           │
+ │  reply read aloud          │   reply    │ (Basic/Plus) the AI agent does the steps│
  └────────────────────────────┘            └────────────────────────────────────────┘
 ```
 
@@ -104,20 +108,97 @@ code they read out to you on the phone.
   reach them. Settings are one file:
   `%APPDATA%\aiuta\config.json`.
 
-## The AI helper (optional)
+## Plans
 
-In the setup page, tick **Let them talk naturally**, paste an Anthropic API
-key from <https://console.anthropic.com>, and save. The installer already
-includes everything it needs.
+| | **Free** | **Basic** | **Plus** |
+|---|---|---|---|
+| Opens apps, sites, searches, YouTube, maps | ✓ | ✓ | ✓ |
+| Starts emails, WhatsApp and calls, words filled in | ✓ | ✓ | ✓ |
+| Understands anything they say, answers questions | | ✓ | ✓ |
+| Writes the email or message for them | | ✓ | ✓ |
+| Does the steps on screen (asks before sending) | | ✓ | ✓ |
+| AI | none | Amazon Nova Lite / Micro | Claude |
+| Running cost (estimate, see below) | $0 | well under $1 a month | a few dollars upwards |
 
-- The AI is only used when the free part doesn't understand, so everyday
-  requests stay free.
-- It can open the same things (shortcuts, searches, YouTube, the map, a new
-  email or chat with someone the family added), answer questions, and warn
-  about likely scams.
-- It uses Claude at low effort with short replies to keep costs down. You
-  can change the model in the setup page; `claude-haiku-5-5` costs much less
-  per question.
+Simple requests ("open my email", "search for…", "what time is it") are
+always handled for free on the computer, even on Basic and Plus. The AI is
+only used for what the free part can't do.
+
+### How the agent works
+
+1. They say "email Mary that I'll be late on Sunday".
+2. The agent writes a short, warm email in their voice and opens it, ready
+   to send.
+3. It **reads the screen as text** through Windows UI Automation, the same
+   system screen readers use, and sees for example `[1] button "Send"`.
+4. Aiuta asks out loud: *"Shall I send the email to Mary?"* with big **Yes**
+   and **No** buttons.
+5. On Yes it presses Send and says it's done.
+
+While it works, Aiuta shrinks into a corner of the screen, showing each step
+and a big red **Stop** button.
+
+Reading the screen as text (not screenshots) is what keeps it cheap. Each
+step is a few hundred words, so even Amazon Nova Micro can do it.
+
+### Safety rules
+
+These rules are enforced by Aiuta's own code, not by the AI, so a confused or
+tricked AI can't get around them. They live in `aiuta/agent/safety.py`.
+
+- **Asks first** before pressing anything that sends, buys, pays, deletes,
+  posts, shares or installs (in many languages), and before pressing Enter
+  in email or chat windows.
+- **Stops completely on bank, payment and sign-in pages**, and doesn't show
+  them to the AI.
+- **Never types into password boxes.**
+- **"Show them how" mode** (in setup) never presses anything. It tells them
+  which button to press instead.
+- **Warns about scams** (requests for money, gift cards, passwords or remote
+  access).
+- **Privacy:** on Basic and Plus, the words on screen are sent to the AI
+  provider to work out what to press. Setup says this plainly.
+
+Screen reading works on Windows. On other systems the agent can still write
+and open emails, messages, searches and maps.
+
+### Setting up Basic (Amazon Nova)
+
+1. In an AWS account, open **Amazon Bedrock**, choose a region near them
+   (e.g. `ap-southeast-2` for Australia or `eu-south-1` for Italy), and create
+   a **Bedrock API key**.
+2. In Aiuta setup, choose **Basic**, paste the key, choose the region and
+   **Nova Lite** (or **Nova Micro**, the cheapest), and save.
+
+### Setting up Plus (Claude)
+
+Choose **Plus**, paste an Anthropic API key from
+<https://console.anthropic.com>, and save. The model can be changed in setup.
+
+### What it costs to run (estimates)
+
+A typical agent task (write an email, look at the screen, press Send) is
+about five AI steps, roughly 20,000-25,000 tokens in and 1,000 out. These
+are estimates; real use will vary.
+
+| AI | Price per million tokens (in / out) | Per task (est.) | 10 tasks a day, a month (est.) |
+|---|---|---|---|
+| Amazon Nova Micro | $0.035 / $0.14 | ~$0.001 | ~$0.30 |
+| Amazon Nova Lite | $0.06 / $0.24 | ~$0.002 | ~$0.50 |
+| Claude Haiku 5.5 | $0.10 / $0.50 | ~$0.003 | ~$1 |
+| Claude Sonnet 5.5 | $2 / $10 | ~$0.06 | ~$18 |
+| Claude Opus 5.5 (default for Plus) | $4 / $20 | ~$0.12 | ~$36 |
+
+Nova prices are on-demand US East rates from public price lists. Check the
+[Bedrock pricing page](https://aws.amazon.com/bedrock/pricing/) for your
+region.
+
+So a **$3/month Basic plan** covers the AI cost with room to spare. Today,
+Basic and Plus use the family's own AWS or Anthropic key, and the family
+pays the provider directly. A hosted plan, where people simply pay $3 a
+month with no keys, needs an "Aiuta Cloud" relay that holds the key, counts
+usage and takes payment. That is the next piece to build (see
+[License and business model](#license-and-business-model)).
 
 ## Languages
 
@@ -154,7 +235,7 @@ python -m aiuta try "email Mary about lunch" # test a phrase, without opening an
 | `aiuta/launcher.py` | What the desktop icon runs: starts the server and opens the window. |
 | `aiuta/web/` | The window (`index.html`) and the family setup page (`setup.html`). |
 | `aiuta/locales/` | One file per language. |
-| `aiuta/assistant.py` | The optional AI helper. |
+| `aiuta/agent/` | The AI agent: `loop.py` (the steps), `tools.py`, `safety.py` (the rules), `desktop.py` (reading the screen), `nova.py` and `claude.py` (the AIs). |
 | `installer/` | The Windows installer (Inno Setup), icon and build entry point. |
 | `.github/workflows/windows.yml` | Tests and builds `Aiuta-Setup.exe` on every push. A tag like `v0.2.0` publishes a release. |
 

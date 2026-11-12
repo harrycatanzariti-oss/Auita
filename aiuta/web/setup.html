@@ -17,7 +17,7 @@
   .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; margin:12px 0; }
   label { display:block; font-size:14px; color:var(--muted); margin:10px 0 4px; }
   label.check { display:flex; gap:8px; align-items:center; font-size:16px; color:var(--ink); }
-  input:not([type=checkbox]), select { width:100%; font:inherit; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--ink); }
+  input:not([type=checkbox]):not([type=radio]), select { width:100%; font:inherit; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--ink); }
   .row { display:grid; grid-template-columns:1fr 1fr; gap:0 14px; }
   @media (max-width:640px){ .row { grid-template-columns:1fr; } }
   button { font:inherit; padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; }
@@ -26,6 +26,13 @@
   .actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
   .sticky { position:sticky; bottom:0; background:var(--bg); padding:12px 0 16px; margin-top:24px; border-top:1px solid var(--line); display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
   #msg { color:var(--muted); } #msg.bad { color:var(--bad); }
+  label.plan { display:flex; gap:10px; align-items:flex-start; color:var(--ink); font-size:16px; margin:12px 0 4px; cursor:pointer; }
+  label.plan input { margin-top:5px; }
+  label.plan small { color:var(--muted); font-size:14px; }
+  .planbox { margin:0 0 8px 28px; display:none; }
+  .planbox.show { display:block; }
+  #agentBox { display:none; border-top:1px solid var(--line); margin-top:14px; padding-top:4px; }
+  #agentBox.show { display:block; }
 </style>
 </head>
 <body>
@@ -65,13 +72,43 @@
   <div id="shortcuts"></div>
   <div class="actions"><button id="addShortcut" data-t="add"></button></div>
 
-  <h2 data-t="ai_title"></h2>
-  <div class="card">
-    <label class="check"><input type="checkbox" id="ai"> <span data-t="ai_enable"></span></label>
-    <p class="hint" data-t="ai_hint"></p>
-    <div class="row">
-      <div><label for="key" data-t="api_key"></label><input id="key" type="password" autocomplete="off"></div>
-      <div><label for="model" data-t="model"></label><input id="model"></div>
+  <h2 data-t="plan_title"></h2>
+  <div class="card plans">
+    <label class="plan"><input type="radio" name="plan" value="free">
+      <span><b data-t="plan_free"></b><br><small data-t="plan_free_desc"></small></span></label>
+    <label class="plan"><input type="radio" name="plan" value="basic">
+      <span><b data-t="plan_basic"></b><br><small data-t="plan_basic_desc"></small></span></label>
+    <div class="planbox" id="basicBox">
+      <div class="row">
+        <div><label for="awsKey" data-t="aws_key"></label><input id="awsKey" type="password" autocomplete="off"></div>
+        <div><label for="awsRegion" data-t="aws_region"></label>
+          <select id="awsRegion">
+            <option>us-east-1</option><option>us-west-2</option><option>eu-west-1</option>
+            <option>eu-central-1</option><option>eu-south-1</option><option>ap-southeast-2</option>
+            <option>ap-northeast-1</option><option>ap-south-1</option><option>ca-central-1</option>
+          </select></div>
+        <div><label for="novaModel" data-t="nova_model"></label>
+          <select id="novaModel">
+            <option value="amazon.nova-micro-v1:0" data-t="nova_micro"></option>
+            <option value="amazon.nova-lite-v1:0" data-t="nova_lite"></option>
+          </select></div>
+      </div>
+    </div>
+    <label class="plan"><input type="radio" name="plan" value="plus">
+      <span><b data-t="plan_plus"></b><br><small data-t="plan_plus_desc"></small></span></label>
+    <div class="planbox" id="plusBox">
+      <div class="row">
+        <div><label for="claudeKey" data-t="claude_key"></label><input id="claudeKey" type="password" autocomplete="off"></div>
+        <div><label for="claudeModel" data-t="model"></label><input id="claudeModel"></div>
+      </div>
+    </div>
+    <div id="agentBox">
+      <label for="agentMode" data-t="mode"></label>
+      <select id="agentMode">
+        <option value="do" data-t="mode_do"></option>
+        <option value="show" data-t="mode_show"></option>
+      </select>
+      <p class="hint" data-t="privacy" style="margin-top:10px"></p>
     </div>
   </div>
 
@@ -187,19 +224,33 @@ async function load() {
   $("#person").value = cfg.person_name; $("#helper").value = cfg.helper_name;
   $("#speak").checked = cfg.speak_replies;
   $("#emailService").value = cfg.email_service; $("#messaging").value = cfg.messaging;
-  $("#ai").checked = cfg.ai.enabled; $("#key").value = cfg.ai.api_key || ""; $("#model").value = cfg.ai.model;
+  document.querySelector(`input[name=plan][value=${cfg.plan}]`).checked = true;
+  $("#awsKey").value = cfg.basic.api_key || ""; $("#awsRegion").value = cfg.basic.region;
+  $("#novaModel").value = cfg.basic.model;
+  $("#claudeKey").value = cfg.plus.api_key || ""; $("#claudeModel").value = cfg.plus.model;
+  $("#agentMode").value = cfg.agent_mode;
+  showPlan();
   cfg.contacts.forEach(addPerson);
   cfg.shortcuts.forEach(addShortcut);
   $("#back").href = "/?key=" + encodeURIComponent(KEY);
 }
 
+const plan = () => (document.querySelector("input[name=plan]:checked") || {}).value || "free";
+function showPlan() {
+  $("#basicBox").classList.toggle("show", plan() === "basic");
+  $("#plusBox").classList.toggle("show", plan() === "plus");
+  $("#agentBox").classList.toggle("show", plan() !== "free");
+}
+document.querySelectorAll("input[name=plan]").forEach(r => r.onchange = showPlan);
 $("#addPerson").onclick = () => addPerson();
 $("#addShortcut").onclick = () => addShortcut();
 $("#save").onclick = async () => {
   const body = { ...cfg,
     person_name: $("#person").value, helper_name: $("#helper").value, language: $("#language").value,
     speak_replies: $("#speak").checked, email_service: $("#emailService").value, messaging: $("#messaging").value,
-    ai: { ...cfg.ai, enabled: $("#ai").checked, api_key: $("#key").value, model: $("#model").value },
+    plan: plan(), agent_mode: $("#agentMode").value,
+    basic: { api_key: $("#awsKey").value, region: $("#awsRegion").value, model: $("#novaModel").value },
+    plus: { api_key: $("#claudeKey").value, model: $("#claudeModel").value },
     contacts: [...$("#people").children].map(readPerson).filter(p => p.name),
     shortcuts: [...$("#shortcuts").children].map(readShortcut).filter(s => s.name || s.target) };
   const languageChanged = body.language !== cfg.language;

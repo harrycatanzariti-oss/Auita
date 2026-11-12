@@ -27,6 +27,9 @@ ACTION_TYPES = {
     "remote_help",   # target: path to RustDesk / TeamViewer QuickSupport / AnyDesk
 }
 EMAIL_SERVICES = {"gmail", "outlook", "mailto"}
+PLANS = {"free", "basic", "plus"}
+AGENT_MODES = {"do", "show"}
+SECRET_FIELDS = (("basic", "api_key"), ("plus", "api_key"))
 MESSAGING = {"whatsapp_app", "whatsapp_web"}
 
 DEFAULT_CONFIG: dict = {
@@ -40,11 +43,21 @@ DEFAULT_CONFIG: dict = {
     "confidence_run": 0.78,
     # Below this, it says it didn't understand. In between, it asks "Did you mean ...?"
     "confidence_ask": 0.5,
-    "ai": {
-        "enabled": False,
+    # "free": opens things and fills in emails/messages; they press Send.
+    # "basic": the AI agent on Amazon Nova does the steps for them (very cheap).
+    # "plus": the same agent on Claude, for harder tasks.
+    "plan": "free",
+    # "do": the agent presses buttons (always asking before sending/buying/deleting).
+    # "show": the agent only tells them what to press.
+    "agent_mode": "do",
+    "basic": {
+        "api_key": "",          # an Amazon Bedrock API key
+        "region": "us-east-1",
+        "model": "amazon.nova-lite-v1:0",
+    },
+    "plus": {
+        "api_key": "",          # an Anthropic API key (or ANTHROPIC_API_KEY)
         "model": "claude-opus-5-5",
-        # Leave empty to use the ANTHROPIC_API_KEY environment variable.
-        "api_key": "",
     },
     "contacts": [],
     "shortcuts": [],
@@ -153,11 +166,22 @@ def _clean_contacts(items) -> list[dict]:
 def validate(cfg: dict) -> dict:
     """Return a cleaned copy of cfg, filling defaults. Raises ConfigError on bad entries."""
     out = deepcopy(DEFAULT_CONFIG)
+    cfg = dict(cfg)
+    old_ai = cfg.pop("ai", None)  # settings from Aiuta 0.2 and earlier
+    if isinstance(old_ai, dict) and "plan" not in cfg:
+        if old_ai.get("enabled"):
+            cfg["plan"] = "plus"
+        cfg.setdefault("plus", {"api_key": old_ai.get("api_key", ""),
+                                "model": old_ai.get("model") or "claude-opus-5-5"})
     for key, value in cfg.items():
-        if key == "ai" and isinstance(value, dict):
-            out["ai"].update(value)
+        if key in ("basic", "plus") and isinstance(value, dict):
+            out[key].update({k: str(v).strip() for k, v in value.items() if k in out[key]})
         elif key in out:
             out[key] = value
+    if out["plan"] not in PLANS:
+        out["plan"] = "free"
+    if out["agent_mode"] not in AGENT_MODES:
+        out["agent_mode"] = "do"
     if out["language"] not in i18n.available():
         out["language"] = i18n.FALLBACK
     if out["email_service"] not in EMAIL_SERVICES:

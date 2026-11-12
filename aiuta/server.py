@@ -30,32 +30,46 @@ MAX_TILES = 8
 
 
 class AiutaServer:
-    def __init__(self, port: int = DEFAULT_PORT, cfg_path=None, runner=None, key: str | None = None):
+    def __init__(self, port: int = DEFAULT_PORT, cfg_path=None, runner=None, key: str | None = None,
+                 desktop=None, make_provider=None):
         self.cfg_path = cfg_path
         self.key = key or secrets.token_urlsafe(24)
         self.runner = runner or actions.Runner()
+        self.desktop = desktop            # tests pass a pretend screen
+        self.make_provider = make_provider  # tests pass a pretend AI
         self.lock = threading.Lock()
         self.brain = Brain(config.load(cfg_path), runner=self.runner)
-        self._load_ai()
+        self._load_agent()
         self.httpd = ThreadingHTTPServer(("127.0.0.1", port), self._handler())
         self.port = self.httpd.server_address[1]
 
     # ---- state -------------------------------------------------------------
 
-    def _load_ai(self) -> None:
-        self.brain.assistant = None
+    def _load_agent(self) -> None:
+        from . import agent
+
+        self.brain.agent = None
         cfg = self.brain.cfg
-        if cfg["ai"].get("enabled"):
-            try:
-                from .assistant import Assistant
-                self.brain.assistant = Assistant(cfg)
-            except Exception as e:  # missing package or key: keep working without AI
-                print("AI helper is off:", e)
+        if cfg["plan"] == "free" and self.make_provider is None:
+            return
+        try:
+            self.brain.agent = agent.build(cfg, self.brain, self.desktop, self.make_provider)
+        except Exception as e:  # missing package or key: keep working on the free plan
+            print("AI agent is off:", e)
 
     def reload(self, cfg: dict) -> None:
         with self.lock:
+            old = self.brain.agent
+            if old is not None:
+                old.stop()
             self.brain = Brain(cfg, runner=self.runner)
-            self._load_ai()
+            self._load_agent()
+
+    def agent_status(self) -> dict:
+        a = self.brain.agent
+        if a is None:
+            return {"working": False, "steps": [], "question": "", "reply": "", "ran": ""}
+        return a.status()
 
     def url(self, page: str = "") -> str:
         return f"http://127.0.0.1:{self.port}/{page}?key={self.key}"
@@ -75,6 +89,7 @@ class AiutaServer:
             "helper_name": cfg["helper_name"],
             "speak_replies": cfg["speak_replies"],
             "set_up": bool(cfg["shortcuts"] or cfg["contacts"]),
+            "plan": cfg["plan"] if self.brain.agent is not None else "free",
             "tiles": tiles[:MAX_TILES],
             "ui": loc.data["ui"],
         }
@@ -136,10 +151,13 @@ class AiutaServer:
                     return self._json(403, {"error": "not allowed"})
                 if path == "/api/ui":
                     return self._json(200, server.ui_info())
+                if path == "/api/status":
+                    return self._json(200, server.agent_status())
                 if path == "/api/config":
                     cfg = config.load(server.cfg_path)
-                    if cfg["ai"].get("api_key"):
-                        cfg["ai"]["api_key"] = MASK
+                    for section, field in config.SECRET_FIELDS:
+                        if cfg[section].get(field):
+                            cfg[section][field] = MASK
                     loc = i18n.get(cfg["language"])
                     return self._json(200, {"config": cfg, "languages": i18n.available(),
                                             "setup": loc.data["setup"]})
@@ -160,6 +178,18 @@ class AiutaServer:
                         result = server.brain.hear(str(body.get("text", ""))[:500])
                     return self._json(200, result.to_dict())
 
+                if path == "/api/stop":
+                    agent = server.brain.agent
+                    if agent is not None:
+                        agent.stop()
+                    return self._json(200, {"ok": True})
+
+                if path == "/api/answer":
+                    agent = server.brain.agent
+                    if agent is not None and agent.waiting:
+                        agent.answer(bool(body.get("yes")))
+                    return self._json(200, {"ok": True})
+
                 if path == "/api/tile":
                     with server.lock:
                         brain = server.brain
@@ -172,8 +202,9 @@ class AiutaServer:
 
                 if path == "/api/config":
                     old = config.load(server.cfg_path)
-                    if body.get("ai", {}).get("api_key") == MASK:
-                        body["ai"]["api_key"] = old["ai"].get("api_key", "")
+                    for section, field in config.SECRET_FIELDS:
+                        if (body.get(section) or {}).get(field) == MASK:
+                            body[section][field] = old[section].get(field, "")
                     try:
                         cfg = config.save(body, server.cfg_path)
                     except config.ConfigError as e:

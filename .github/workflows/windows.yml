@@ -34,10 +34,16 @@ jobs:
       - name: Install build tools
         run: |
           python -m pip install --upgrade pip
-          pip install pyinstaller pytest anthropic
+          pip install pyinstaller pytest anthropic uiautomation
 
       - name: Run the tests
         run: python -m pytest -q
+
+      - name: Check screen reading on a real Windows desktop (Notepad)
+        continue-on-error: true   # build machines don't always have a usable desktop
+        env:
+          AIUTA_WINDOWS_UI_TEST: "1"
+        run: python -m pytest -q -s tests/test_windows_desktop.py
 
       - name: Work out the version
         id: version
@@ -59,7 +65,9 @@ jobs:
           --icon installer/aiuta.ico
           --add-data "aiuta/web;aiuta/web"
           --add-data "aiuta/locales;aiuta/locales"
-          --hidden-import aiuta.assistant
+          --hidden-import aiuta.agent.nova
+          --hidden-import aiuta.agent.claude
+          --collect-submodules uiautomation
           --collect-submodules anthropic
           installer/aiuta_entry.py
 

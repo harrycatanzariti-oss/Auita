@@ -1,11 +1,15 @@
 """Turns what was said into what to do, with no screen or microphone involved.
 
 Order of checks for each thing they say:
-  1. Answering a "Did you mean …?" question (yes / no)
-  2. A request with something in it: "email Mary", "search for …"
-  3. A shortcut or built-in phrase: "photos", "what time is it"
-  4. The AI helper, if switched on
-  5. "Did you mean …?" if it was close, otherwise "I didn't understand"
+  1. The agent is waiting for a yes/no ("Shall I send it?"), or still working
+  2. Answering a "Did you mean …?" question (yes / no)
+  3. A request with something in it: "email Mary", "search for …"
+  4. A shortcut or built-in phrase: "photos", "what time is it"
+  5. On Basic/Plus: everything else goes to the AI agent
+  6. "Did you mean …?" if it was close, otherwise "I didn't understand"
+
+Steps 2-4 are free and instant, so the AI (which costs money) is only used
+when it's needed.
 """
 from __future__ import annotations
 
@@ -21,16 +25,18 @@ class Result:
     ran: str = ""                 # what was opened, if anything
     question: str = ""            # the shortcut we're asking "Did you mean …?" about
     heard: str = ""
+    working: bool = False         # the agent has started; the window shows its progress
 
     def to_dict(self) -> dict:
-        return {"reply": self.reply, "ran": self.ran, "question": self.question, "heard": self.heard}
+        return {"reply": self.reply, "ran": self.ran, "question": self.question,
+                "heard": self.heard, "working": self.working}
 
 
 @dataclass
 class Brain:
     cfg: dict
     runner: actions.Runner = field(default_factory=actions.Runner)
-    assistant: object | None = None   # aiuta.assistant.Assistant when the AI version is on
+    agent: object | None = None       # aiuta.agent.Agent on the Basic and Plus plans
     pending: dict | None = None       # shortcut waiting for a yes/no
 
     @property
@@ -85,10 +91,12 @@ class Brain:
         if kind == "email":
             if not person["email"]:
                 return Result(self.t("no_email", contact=who))
+            body = intent.get("text", "")
             link = intents.email_link(self.cfg["email_service"], person["email"],
-                                      intent.get("subject", ""))
+                                      intent.get("subject", ""), body)
             action = "open_link" if link.startswith("mailto:") else "open_website"
-            return self._open(action, link, who, self.t("email_to", contact=who))
+            reply = self.t("email_ready" if body else "email_to", contact=who)
+            return self._open(action, link, who, reply)
         if kind == "call" and person["call_link"]:
             return self._open("call", person["call_link"], who, self.t("call_link", contact=who))
         if kind in ("message", "call"):
@@ -97,7 +105,10 @@ class Brain:
             link = intents.whatsapp_link(self.cfg["messaging"], person["phone"],
                                          intent.get("text", ""))
             action = "open_website" if link.startswith("http") else "open_link"
-            reply = self.t("call_to" if kind == "call" else "message_to", contact=who)
+            if kind == "call":
+                reply = self.t("call_to", contact=who)
+            else:
+                reply = self.t("message_ready" if intent.get("text") else "message_to", contact=who)
             return self._open(action, link, who, reply)
         return Result(self.t("not_understood"))
 
@@ -124,6 +135,16 @@ class Brain:
         if not said:
             return Result(self.t("didnt_catch"))
 
+        agent = self.agent
+        if agent is not None and agent.working:
+            if agent.waiting:
+                answer = matcher.yes_or_no(said, self.loc)
+                if answer:
+                    agent.answer(answer == "yes")
+                    return Result("", working=True)
+                return Result(agent.question, question=agent.question, working=True)
+            return Result(self.t("agent_busy"), working=True)
+
         if self.pending:
             answer = matcher.yes_or_no(said, self.loc)
             sc, self.pending = self.pending, None
@@ -135,6 +156,9 @@ class Brain:
 
         intent = intents.parse(said, self.cfg, self.loc)
         if intent:
+            if agent is not None and intent.get("text") and self.cfg["agent_mode"] == "do":
+                # "Email Mary saying …": the agent writes it properly and can send it.
+                return self._start_agent(said)
             return self.act(intent)
 
         m = matcher.best_match(said, self.cfg["shortcuts"], self.loc)
@@ -143,14 +167,16 @@ class Brain:
                 return Result(self.builtin(m.name))
             return self.run_shortcut(m.name)
 
-        if self.assistant is not None:
-            try:
-                return self.assistant.handle(said, self)
-            except Exception:
-                pass  # no internet, bad key...: carry on with the free behaviour
+        if agent is not None:
+            return self._start_agent(said)
 
         if m.score >= self.cfg["confidence_ask"] and m.kind == "shortcut":
             self.pending = m.shortcut
             return Result(self.t("did_you_mean", name=m.name), question=m.name)
 
         return Result(self.t("not_understood"))
+
+    def _start_agent(self, said: str) -> Result:
+        self.pending = None
+        self.agent.start(said)
+        return Result("", working=True)

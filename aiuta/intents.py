@@ -6,8 +6,10 @@
 "How do I get to the hospital"       -> the map, with directions there
 "Call Mary" / "Message Mary"         -> WhatsApp (or their call link), on Mary
 
-Aiuta only ever takes them to the right screen. It never sends, posts or
-calls on its own: they press Send themselves.
+"Email Mary saying I'll be late"     -> the same, with "I'll be late" already written in
+
+On the free plan Aiuta only takes them to the right screen, with the words
+filled in. It never sends, posts or calls on its own: they press Send.
 
 The words and patterns come from the language file, so this works in any
 language that has one.
@@ -129,26 +131,50 @@ def parse(said: str, cfg: dict, loc: Locale) -> dict | None:
     if not found:
         return None
     pos, intent = min(found, key=lambda f: f[0])  # whatever they said first
+    if intent["intent"] in ("email", "message"):
+        # "…saying I'll be late" / "…that I'll be late": the words to send.
+        text = _after(norm, loc.data.get("message_words", []), loc)
+        joiners = {normalize(w) for w in loc.data.get("message_words", []) if " " not in w}
+        words = text.split()
+        while len(words) > 1 and words[0] in joiners:  # "saying that …" -> "…"
+            words.pop(0)
+        text = _original_case(" ".join(words), said)
+        intent["text"] = text
     if intent["intent"] == "email":
         subject = _after(norm, loc.data.get("subject_words", []), loc)
         intent["subject"] = _original_case(subject, said)
-    elif intent["intent"] == "message":
-        text = _after(norm, loc.data.get("message_words", []), loc)
-        intent["text"] = _original_case(text, said)
+        if intent["text"] and intent["subject"].endswith(intent["text"]):
+            # "about lunch saying I'll be late": the subject stops where the message starts.
+            intent["subject"] = _strip_words(intent["subject"][: -len(intent["text"])], loc)
     return intent
+
+
+def _strip_words(text: str, loc: Locale) -> str:
+    """Drop a dangling "saying"/"that" left at the end of a subject."""
+    words = text.split()
+    endings = {normalize(w) for w in loc.data.get("message_words", []) if " " not in w}
+    while words and normalize(words[-1]) in endings:
+        words.pop()
+    return " ".join(words).strip()
 
 
 # ---- Where each request goes -------------------------------------------------
 
-def email_link(service: str, to: str, subject: str = "") -> str:
+def email_link(service: str, to: str, subject: str = "", body: str = "") -> str:
     if service == "outlook":
-        return "https://outlook.live.com/mail/0/deeplink/compose?" + urlencode(
-            {"to": to, "subject": subject})
+        params = {"to": to, "subject": subject}
+        if body:
+            params["body"] = body
+        return "https://outlook.live.com/mail/0/deeplink/compose?" + urlencode(params)
     if service == "mailto":
-        return f"mailto:{quote(to, safe='@')}" + (f"?subject={quote(subject)}" if subject else "")
+        extra = {k: v for k, v in (("subject", subject), ("body", body)) if v}
+        query = "&".join(f"{k}={quote(v)}" for k, v in extra.items())
+        return f"mailto:{quote(to, safe='@')}" + (f"?{query}" if query else "")
     params = {"view": "cm", "fs": "1", "to": to}
     if subject:
         params["su"] = subject
+    if body:
+        params["body"] = body
     return "https://mail.google.com/mail/?" + urlencode(params)
 
 

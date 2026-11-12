@@ -1,65 +1,309 @@
 {
   "name": "Italiano",
   "speech": "it-IT",
-
   "filler": [
-    "per", "favore", "puoi", "potresti", "vorrei", "voglio", "apri", "aprire", "aprimi", "mostra",
-    "mostrami", "fammi", "vedere", "il", "la", "lo", "l", "i", "gli", "le", "un", "una", "uno", "mio",
-    "mia", "miei", "mie", "e", "di", "del", "della", "dei", "a", "ai", "al", "alla", "in", "su", "sul",
-    "ciao", "grazie", "ok", "allora", "poi", "adesso", "ora", "me", "mi", "ti", "prego", "metti",
-    "vai", "andare", "nuova", "nuovo", "c'è", "dove"
+    "per",
+    "favore",
+    "puoi",
+    "potresti",
+    "vorrei",
+    "voglio",
+    "apri",
+    "aprire",
+    "aprimi",
+    "mostra",
+    "mostrami",
+    "fammi",
+    "vedere",
+    "il",
+    "la",
+    "lo",
+    "l",
+    "i",
+    "gli",
+    "le",
+    "un",
+    "una",
+    "uno",
+    "mio",
+    "mia",
+    "miei",
+    "mie",
+    "e",
+    "di",
+    "del",
+    "della",
+    "dei",
+    "a",
+    "ai",
+    "al",
+    "alla",
+    "in",
+    "su",
+    "sul",
+    "ciao",
+    "grazie",
+    "ok",
+    "allora",
+    "poi",
+    "adesso",
+    "ora",
+    "me",
+    "mi",
+    "ti",
+    "prego",
+    "metti",
+    "vai",
+    "andare",
+    "nuova",
+    "nuovo",
+    "c'è",
+    "dove"
   ],
-  "trailing_filler": ["per favore", "grazie", "per me", "adesso", "prego"],
-
+  "trailing_filler": [
+    "per favore",
+    "grazie",
+    "per me",
+    "adesso",
+    "prego"
+  ],
   "builtins": {
-    "list": ["cosa posso dire", "cosa sai fare", "aiuto", "aiutami", "opzioni", "elenco"],
-    "time": ["che ore sono", "che ora è", "ore", "dimmi l'ora"],
-    "date": ["che giorno è", "che giorno è oggi", "data", "che data è oggi", "quanti ne abbiamo"],
-    "yes": ["sì", "si", "certo", "esatto", "va bene", "sì grazie", "giusto", "ok"],
-    "no": ["no", "annulla", "non quello", "lascia stare", "sbagliato", "no grazie", "basta"]
+    "list": [
+      "cosa posso dire",
+      "cosa sai fare",
+      "aiuto",
+      "aiutami",
+      "opzioni",
+      "elenco"
+    ],
+    "time": [
+      "che ore sono",
+      "che ora è",
+      "ore",
+      "dimmi l'ora"
+    ],
+    "date": [
+      "che giorno è",
+      "che giorno è oggi",
+      "data",
+      "che data è oggi",
+      "quanti ne abbiamo"
+    ],
+    "yes": [
+      "sì",
+      "si",
+      "certo",
+      "esatto",
+      "va bene",
+      "sì grazie",
+      "giusto",
+      "ok"
+    ],
+    "no": [
+      "no",
+      "annulla",
+      "non quello",
+      "lascia stare",
+      "sbagliato",
+      "no grazie",
+      "basta"
+    ]
   },
-
   "contact_intents": {
-    "email": ["email", "mail", "posta", "scrivi a", "scrivere a", "scrivi una email", "scrivi una mail", "lettera"],
-    "message": ["messaggio", "whatsapp", "messaggia", "chat", "sms"],
-    "call": ["chiama", "chiamare", "telefona", "telefonare", "videochiamata", "videochiama", "skype"]
+    "email": [
+      "email",
+      "mail",
+      "posta",
+      "scrivi a",
+      "scrivere a",
+      "scrivi una email",
+      "scrivi una mail",
+      "lettera"
+    ],
+    "message": [
+      "messaggio",
+      "whatsapp",
+      "messaggia",
+      "chat",
+      "sms",
+      "di' a",
+      "dì a",
+      "dire a"
+    ],
+    "call": [
+      "chiama",
+      "chiamare",
+      "telefona",
+      "telefonare",
+      "videochiamata",
+      "videochiama",
+      "skype"
+    ]
   },
-  "q_strip": ["metti", "guarda", "cerca", "trova", "fammi", "vedere", "ascolta", "qualche", "video", "di", "per", "favore", "puoi", "potresti", "mi", "un", "una", "voglio", "vorrei"],
-  "subject_words": ["riguardo al", "riguardo alla", "riguardo ai", "riguardo alle", "riguardo allo", "riguardo a", "riguardo", "a proposito di", "oggetto", "per dire"],
-  "message_words": ["dicendo", "che dice", "e digli", "e dille", "e di'"],
-
+  "q_strip": [
+    "metti",
+    "guarda",
+    "cerca",
+    "trova",
+    "fammi",
+    "vedere",
+    "ascolta",
+    "qualche",
+    "video",
+    "di",
+    "per",
+    "favore",
+    "puoi",
+    "potresti",
+    "mi",
+    "un",
+    "una",
+    "voglio",
+    "vorrei"
+  ],
+  "subject_words": [
+    "riguardo al",
+    "riguardo alla",
+    "riguardo ai",
+    "riguardo alle",
+    "riguardo allo",
+    "riguardo a",
+    "riguardo",
+    "a proposito di",
+    "oggetto",
+    "per dire"
+  ],
+  "message_words": [
+    "dicendo",
+    "che dice",
+    "e digli",
+    "e dille",
+    "e di'",
+    "per dirgli",
+    "per dirle",
+    "che"
+  ],
   "query_intents": [
-    {"intent": "youtube", "pattern": "(?:cerca |trova |metti )?(?:su )?youtube {q}"},
-    {"intent": "youtube", "pattern": "(?:metti |guarda |cerca |trova |fammi vedere )?{q} su youtube"},
-    {"intent": "directions", "pattern": "(?:indicazioni|la strada|il percorso) per {q}"},
-    {"intent": "directions", "pattern": "come (?:si )?(?:arrivo|arriva|vado|va) (?:all'|(?:a|al|alla|allo|ai|agli|alle|in) ){q}"},
-    {"intent": "directions", "pattern": "(?:la )?mappa di {q}"},
-    {"intent": "directions", "pattern": "{q} sulla mappa"},
-    {"intent": "search", "pattern": "che tempo fa (?:a|in) {q}", "q": "meteo {q}"},
-    {"intent": "search", "pattern": "meteo (?:a|di|per|in) {q}", "q": "meteo {q}"},
-    {"intent": "search", "pattern": "(?:che tempo fa|meteo)", "q": "meteo"},
-    {"intent": "search", "pattern": "cerca (?:su internet |su google |in internet |online )?{q}"},
-    {"intent": "search", "pattern": "trova su internet {q}"},
-    {"intent": "search", "pattern": "google {q}"}
+    {
+      "intent": "youtube",
+      "pattern": "(?:cerca |trova |metti )?(?:su )?youtube {q}"
+    },
+    {
+      "intent": "youtube",
+      "pattern": "(?:metti |guarda |cerca |trova |fammi vedere )?{q} su youtube"
+    },
+    {
+      "intent": "directions",
+      "pattern": "(?:indicazioni|la strada|il percorso) per {q}"
+    },
+    {
+      "intent": "directions",
+      "pattern": "come (?:si )?(?:arrivo|arriva|vado|va) (?:all'|(?:a|al|alla|allo|ai|agli|alle|in) ){q}"
+    },
+    {
+      "intent": "directions",
+      "pattern": "(?:la )?mappa di {q}"
+    },
+    {
+      "intent": "directions",
+      "pattern": "{q} sulla mappa"
+    },
+    {
+      "intent": "search",
+      "pattern": "che tempo fa (?:a|in) {q}",
+      "q": "meteo {q}"
+    },
+    {
+      "intent": "search",
+      "pattern": "meteo (?:a|di|per|in) {q}",
+      "q": "meteo {q}"
+    },
+    {
+      "intent": "search",
+      "pattern": "(?:che tempo fa|meteo)",
+      "q": "meteo"
+    },
+    {
+      "intent": "search",
+      "pattern": "cerca (?:su internet |su google |in internet |online )?{q}"
+    },
+    {
+      "intent": "search",
+      "pattern": "trova su internet {q}"
+    },
+    {
+      "intent": "search",
+      "pattern": "google {q}"
+    }
   ],
-
   "clock": "24h",
-  "days": ["lunedì", "martedì", "mercoledì", "giovedì", "venerdì", "sabato", "domenica"],
-  "months": ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto",
-             "settembre", "ottobre", "novembre", "dicembre"],
-  "date_format": "{weekday} {day} {month} {year}",
-
-  "default_shortcuts": [
-    {"name": "Email", "action": "open_website", "target": "https://mail.google.com",
-     "phrases": ["posta", "la posta", "le email", "le mail", "messaggi email"]},
-    {"name": "Foto", "action": "open_link", "target": "ms-photos:",
-     "phrases": ["fotografie", "le foto", "immagini"]},
-    {"name": "Notizie", "action": "open_website", "target": "https://www.ansa.it",
-     "phrases": ["il giornale", "le notizie", "giornale"]},
-    {"name": "Calcolatrice", "action": "open_link", "target": "calculator:",
-     "phrases": ["calcoli", "fare i conti"]}
+  "days": [
+    "lunedì",
+    "martedì",
+    "mercoledì",
+    "giovedì",
+    "venerdì",
+    "sabato",
+    "domenica"
   ],
-
+  "months": [
+    "gennaio",
+    "febbraio",
+    "marzo",
+    "aprile",
+    "maggio",
+    "giugno",
+    "luglio",
+    "agosto",
+    "settembre",
+    "ottobre",
+    "novembre",
+    "dicembre"
+  ],
+  "date_format": "{weekday} {day} {month} {year}",
+  "default_shortcuts": [
+    {
+      "name": "Email",
+      "action": "open_website",
+      "target": "https://mail.google.com",
+      "phrases": [
+        "posta",
+        "la posta",
+        "le email",
+        "le mail",
+        "messaggi email"
+      ]
+    },
+    {
+      "name": "Foto",
+      "action": "open_link",
+      "target": "ms-photos:",
+      "phrases": [
+        "fotografie",
+        "le foto",
+        "immagini"
+      ]
+    },
+    {
+      "name": "Notizie",
+      "action": "open_website",
+      "target": "https://www.ansa.it",
+      "phrases": [
+        "il giornale",
+        "le notizie",
+        "giornale"
+      ]
+    },
+    {
+      "name": "Calcolatrice",
+      "action": "open_link",
+      "target": "calculator:",
+      "phrases": [
+        "calcoli",
+        "fare i conti"
+      ]
+    }
+  ],
   "text": {
     "opening": "Apro {name}.",
     "calling": "Chiamo {name}.",
@@ -84,9 +328,24 @@
     "no_email": "Non ho l'indirizzo email di {contact}. Chiedi a {helper} di aggiungerlo.",
     "no_phone": "Non ho il numero di {contact}. Chiedi a {helper} di aggiungerlo.",
     "ai_refused": "Mi dispiace, con questo non posso aiutarti. Chiedi a {helper}.",
-    "not_set_up": "Non ho {name} tra le scorciatoie."
+    "not_set_up": "Non ho {name} tra le scorciatoie.",
+    "email_ready": "Ecco la tua email per {contact}. Controllala, poi premi Invia.",
+    "message_ready": "Ecco il tuo messaggio per {contact}. Controllalo, poi premi Invia.",
+    "step_reading": "Guardo lo schermo…",
+    "step_clicking": "Premo \"{name}\"…",
+    "step_typing": "Scrivo…",
+    "step_key": "Premo {name}…",
+    "step_waiting": "Aspetto che si carichi…",
+    "confirm_press": "Premo \"{name}\"?",
+    "agent_blocked": "Questa sembra una pagina della banca, di pagamento o di accesso, quindi mi fermo qui. Chiedi aiuto a {helper}.",
+    "agent_stopped": "Va bene, mi sono fermato.",
+    "agent_declined": "Va bene, non lo faccio.",
+    "agent_too_long": "Scusa, ci sto mettendo troppo. Chiedi aiuto a {helper}.",
+    "agent_error": "Scusa, l'assistente IA ora non funziona. Controlla internet, o chiedi a {helper}.",
+    "agent_busy": "Sto ancora facendo la cosa di prima. Premi Ferma se vuoi che mi fermi.",
+    "step_writing_email": "Scrivo la tua email a {contact}…",
+    "step_writing_message": "Scrivo il tuo messaggio a {contact}…"
   },
-
   "ui": {
     "didnt_catch": "Non ho sentito. Premi il pulsante e riprova.",
     "hello": "Ciao, {name}",
@@ -106,9 +365,10 @@
     "mic_blocked": "Non ti sento. Chiedi a {helper} di attivare il microfono.",
     "no_internet": "Per parlare serve internet. Controlla la connessione, oppure scrivi qui sotto.",
     "not_set_up_yet": "Aiuta non è ancora configurato.",
-    "set_up_now": "Configuralo adesso"
+    "set_up_now": "Configuralo adesso",
+    "stop": "Ferma",
+    "working": "Ci sto lavorando…"
   },
-
   "setup": {
     "title": "Impostazioni di Aiuta",
     "intro": "Aggiungi le persone e le cose che usa. Premi Prova per controllare che si apra sul suo schermo.",
@@ -155,15 +415,28 @@
     "try": "Prova",
     "remove": "Togli",
     "add": "+ Aggiungi una scorciatoia",
-    "ai_title": "Assistente IA (facoltativo, a pagamento)",
-    "ai_enable": "Può parlare liberamente e fare domande",
-    "ai_hint": "Usa Claude. Serve una chiave API di Anthropic e costa poco per ogni domanda. Può aprire solo le persone e le scorciatoie qui sopra; non può cliccare, scrivere o inviare niente.",
-    "api_key": "Chiave API",
     "model": "Modello",
     "save": "Salva",
     "saved": "Salvato. Può usarlo subito.",
     "back": "← Torna ad Aiuta",
     "error": "Qualcosa è andato storto.",
-    "open_from_app": "Apri questa pagina da Aiuta (il link Impostazioni)."
+    "open_from_app": "Apri questa pagina da Aiuta (il link Impostazioni).",
+    "plan_title": "Quanto aiuto",
+    "plan_free": "Gratis",
+    "plan_free_desc": "Apre le cose, cerca, e prepara email, messaggi e chiamate. Preme Invia da solo/a.",
+    "plan_basic": "Base: lo fa al posto suo (Amazon Nova)",
+    "plan_basic_desc": "Capisce qualsiasi cosa dica, scrive l'email o il messaggio e fa i passaggi sullo schermo. Costa pochissimo.",
+    "plan_plus": "Plus: l'assistente più intelligente (Claude)",
+    "plan_plus_desc": "Come Base, ma più bravo con le cose difficili o insolite. Costa di più.",
+    "mode": "Come deve aiutare?",
+    "mode_do": "Lo fa al posto suo (chiede sempre prima di inviare, comprare o cancellare)",
+    "mode_show": "Gli mostra come fare (dice cosa premere, non preme mai)",
+    "aws_key": "Chiave API di Amazon Bedrock",
+    "aws_region": "Regione AWS",
+    "nova_model": "Modello",
+    "nova_micro": "Nova Micro (il più economico)",
+    "nova_lite": "Nova Lite",
+    "claude_key": "Chiave API di Anthropic",
+    "privacy": "Con Base o Plus, le parole sullo schermo vengono mandate all'IA per capire cosa premere. Si ferma sulle pagine della banca, dei pagamenti e di accesso, e non scrive mai password."
   }
 }

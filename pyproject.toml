@@ -13,7 +13,8 @@ license = { file = "LICENSE" }
 dependencies = []
 
 [project.optional-dependencies]
-ai = ["anthropic"]
+# The AI agent: Claude for Plus (Basic/Nova needs nothing extra), and screen reading on Windows.
+agent = ["anthropic", "uiautomation; sys_platform == 'win32'"]
 dev = ["pytest"]
 
 [project.scripts]

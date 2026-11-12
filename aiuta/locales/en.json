@@ -1,66 +1,301 @@
 {
   "name": "English",
   "speech": "en-US",
-
   "filler": [
-    "please", "can", "could", "would", "you", "i", "want", "to", "wanna", "like", "id", "i'd",
-    "open", "show", "me", "my", "the", "a", "an", "go", "take", "start", "put", "on", "up",
-    "get", "bring", "launch", "run", "let", "lets", "let's", "do", "now", "for", "into", "in",
-    "of", "just", "help", "need", "some", "pull", "turn", "load", "find", "see", "look", "at",
-    "is", "there", "where", "hey", "ok", "okay", "um", "uh", "so", "and", "then", "thanks",
-    "thank", "new"
+    "please",
+    "can",
+    "could",
+    "would",
+    "you",
+    "i",
+    "want",
+    "to",
+    "wanna",
+    "like",
+    "id",
+    "i'd",
+    "open",
+    "show",
+    "me",
+    "my",
+    "the",
+    "a",
+    "an",
+    "go",
+    "take",
+    "start",
+    "put",
+    "on",
+    "up",
+    "get",
+    "bring",
+    "launch",
+    "run",
+    "let",
+    "lets",
+    "let's",
+    "do",
+    "now",
+    "for",
+    "into",
+    "in",
+    "of",
+    "just",
+    "help",
+    "need",
+    "some",
+    "pull",
+    "turn",
+    "load",
+    "find",
+    "see",
+    "look",
+    "at",
+    "is",
+    "there",
+    "where",
+    "hey",
+    "ok",
+    "okay",
+    "um",
+    "uh",
+    "so",
+    "and",
+    "then",
+    "thanks",
+    "thank",
+    "new"
   ],
-  "trailing_filler": ["please", "for me", "thanks", "thank you", "now"],
-
+  "trailing_filler": [
+    "please",
+    "for me",
+    "thanks",
+    "thank you",
+    "now"
+  ],
   "builtins": {
-    "list": ["what can i say", "what can you do", "help me", "options", "list", "what are my options", "help"],
-    "time": ["what time is it", "time", "what's the time", "tell me the time"],
-    "date": ["what day is it", "what's the date", "date", "today's date", "what is today"],
-    "yes": ["yes", "yeah", "yep", "correct", "that's right", "yes please", "ok do it", "sure"],
-    "no": ["no", "nope", "wrong", "not that", "cancel", "stop", "never mind", "no thanks"]
+    "list": [
+      "what can i say",
+      "what can you do",
+      "help me",
+      "options",
+      "list",
+      "what are my options",
+      "help"
+    ],
+    "time": [
+      "what time is it",
+      "time",
+      "what's the time",
+      "tell me the time"
+    ],
+    "date": [
+      "what day is it",
+      "what's the date",
+      "date",
+      "today's date",
+      "what is today"
+    ],
+    "yes": [
+      "yes",
+      "yeah",
+      "yep",
+      "correct",
+      "that's right",
+      "yes please",
+      "ok do it",
+      "sure"
+    ],
+    "no": [
+      "no",
+      "nope",
+      "wrong",
+      "not that",
+      "cancel",
+      "stop",
+      "never mind",
+      "no thanks"
+    ]
   },
-
   "contact_intents": {
-    "email": ["email", "mail", "write to", "write an email", "write a letter"],
-    "message": ["message", "whatsapp", "text", "chat"],
-    "call": ["call", "ring", "phone", "video call", "facetime", "skype"]
+    "email": [
+      "email",
+      "mail",
+      "write to",
+      "write an email",
+      "write a letter"
+    ],
+    "message": [
+      "message",
+      "whatsapp",
+      "text",
+      "chat",
+      "tell"
+    ],
+    "call": [
+      "call",
+      "ring",
+      "phone",
+      "video call",
+      "facetime",
+      "skype"
+    ]
   },
-  "q_strip": ["play", "watch", "search", "find", "look", "listen", "to", "for", "some", "video", "videos", "of", "please", "can", "could", "you", "me", "i", "want", "a", "an", "up"],
-  "subject_words": ["about", "subject"],
-  "message_words": ["saying", "that says", "and say"],
-
+  "q_strip": [
+    "play",
+    "watch",
+    "search",
+    "find",
+    "look",
+    "listen",
+    "to",
+    "for",
+    "some",
+    "video",
+    "videos",
+    "of",
+    "please",
+    "can",
+    "could",
+    "you",
+    "me",
+    "i",
+    "want",
+    "a",
+    "an",
+    "up"
+  ],
+  "subject_words": [
+    "about",
+    "subject"
+  ],
+  "message_words": [
+    "saying",
+    "that says",
+    "and say",
+    "to say",
+    "and tell her",
+    "and tell him",
+    "that"
+  ],
   "query_intents": [
-    {"intent": "youtube", "pattern": "(?:search |look |find )?(?:on )?youtube (?:for )?{q}"},
-    {"intent": "youtube", "pattern": "(?:play |watch |find |search for |look for |put on )?{q} on youtube"},
-    {"intent": "directions", "pattern": "(?:directions|the way|the route) to {q}"},
-    {"intent": "directions", "pattern": "how (?:do i |can i |to )?get to {q}"},
-    {"intent": "directions", "pattern": "(?:a )?map of {q}"},
-    {"intent": "directions", "pattern": "{q} on the map"},
-    {"intent": "search", "pattern": "weather (?:in|for|at) {q}", "q": "weather {q}"},
-    {"intent": "search", "pattern": "weather", "q": "weather"},
-    {"intent": "search", "pattern": "search (?:the internet |the web |online |on google |google )?(?:for )?{q}"},
-    {"intent": "search", "pattern": "look up {q}"},
-    {"intent": "search", "pattern": "google {q}"},
-    {"intent": "search", "pattern": "find out {q}"}
+    {
+      "intent": "youtube",
+      "pattern": "(?:search |look |find )?(?:on )?youtube (?:for )?{q}"
+    },
+    {
+      "intent": "youtube",
+      "pattern": "(?:play |watch |find |search for |look for |put on )?{q} on youtube"
+    },
+    {
+      "intent": "directions",
+      "pattern": "(?:directions|the way|the route) to {q}"
+    },
+    {
+      "intent": "directions",
+      "pattern": "how (?:do i |can i |to )?get to {q}"
+    },
+    {
+      "intent": "directions",
+      "pattern": "(?:a )?map of {q}"
+    },
+    {
+      "intent": "directions",
+      "pattern": "{q} on the map"
+    },
+    {
+      "intent": "search",
+      "pattern": "weather (?:in|for|at) {q}",
+      "q": "weather {q}"
+    },
+    {
+      "intent": "search",
+      "pattern": "weather",
+      "q": "weather"
+    },
+    {
+      "intent": "search",
+      "pattern": "search (?:the internet |the web |online |on google |google )?(?:for )?{q}"
+    },
+    {
+      "intent": "search",
+      "pattern": "look up {q}"
+    },
+    {
+      "intent": "search",
+      "pattern": "google {q}"
+    },
+    {
+      "intent": "search",
+      "pattern": "find out {q}"
+    }
   ],
-
   "clock": "12h",
-  "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-  "months": ["January", "February", "March", "April", "May", "June", "July", "August",
-             "September", "October", "November", "December"],
-  "date_format": "{weekday}, {day} {month} {year}",
-
-  "default_shortcuts": [
-    {"name": "Email", "action": "open_website", "target": "https://mail.google.com",
-     "phrases": ["emails", "my mail", "check my messages", "inbox"]},
-    {"name": "Photos", "action": "open_link", "target": "ms-photos:",
-     "phrases": ["pictures", "my photos", "the photos"]},
-    {"name": "News", "action": "open_website", "target": "https://www.bbc.com/news",
-     "phrases": ["the news", "newspaper"]},
-    {"name": "Calculator", "action": "open_link", "target": "calculator:",
-     "phrases": ["calculate", "sums"]}
+  "days": [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday"
   ],
-
+  "months": [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ],
+  "date_format": "{weekday}, {day} {month} {year}",
+  "default_shortcuts": [
+    {
+      "name": "Email",
+      "action": "open_website",
+      "target": "https://mail.google.com",
+      "phrases": [
+        "emails",
+        "my mail",
+        "check my messages",
+        "inbox"
+      ]
+    },
+    {
+      "name": "Photos",
+      "action": "open_link",
+      "target": "ms-photos:",
+      "phrases": [
+        "pictures",
+        "my photos",
+        "the photos"
+      ]
+    },
+    {
+      "name": "News",
+      "action": "open_website",
+      "target": "https://www.bbc.com/news",
+      "phrases": [
+        "the news",
+        "newspaper"
+      ]
+    },
+    {
+      "name": "Calculator",
+      "action": "open_link",
+      "target": "calculator:",
+      "phrases": [
+        "calculate",
+        "sums"
+      ]
+    }
+  ],
   "text": {
     "opening": "Opening {name}.",
     "calling": "Calling {name}.",
@@ -85,9 +320,24 @@
     "no_email": "I don't have an email address for {contact}. Ask {helper} to add it.",
     "no_phone": "I don't have a phone number for {contact}. Ask {helper} to add it.",
     "ai_refused": "Sorry, I can't help with that one. Ask {helper}.",
-    "not_set_up": "I don't have {name} set up."
+    "not_set_up": "I don't have {name} set up.",
+    "email_ready": "Here's your email to {contact}. Check it, then press Send.",
+    "message_ready": "Here's your message to {contact}. Check it, then press Send.",
+    "step_reading": "Looking at the screen…",
+    "step_clicking": "Pressing \"{name}\"…",
+    "step_typing": "Typing…",
+    "step_key": "Pressing {name}…",
+    "step_waiting": "Waiting for it to load…",
+    "confirm_press": "Shall I press \"{name}\"?",
+    "agent_blocked": "This looks like a bank, payment or sign-in page, so I'll stop here. Ask {helper} to help with this one.",
+    "agent_stopped": "Okay, I've stopped.",
+    "agent_declined": "Okay, I won't do that.",
+    "agent_too_long": "Sorry, that's taking too long. Ask {helper} to help.",
+    "agent_error": "Sorry, the AI helper isn't working right now. Check the internet, or ask {helper}.",
+    "agent_busy": "I'm still working on the last thing. Press Stop if you want me to stop.",
+    "step_writing_email": "Writing your email to {contact}…",
+    "step_writing_message": "Writing your message to {contact}…"
   },
-
   "ui": {
     "didnt_catch": "I didn't catch that. Press the button and try again.",
     "hello": "Hello, {name}",
@@ -107,9 +357,10 @@
     "mic_blocked": "I can't hear you. Ask {helper} to allow the microphone.",
     "no_internet": "Talking needs the internet. Check the internet, or type below.",
     "not_set_up_yet": "Aiuta isn't set up yet.",
-    "set_up_now": "Set it up now"
+    "set_up_now": "Set it up now",
+    "stop": "Stop",
+    "working": "Working on it…"
   },
-
   "setup": {
     "title": "Aiuta Setup",
     "intro": "Add the people and things they use. Press Try it to check each one opens on their screen.",
@@ -156,15 +407,28 @@
     "try": "Try it",
     "remove": "Remove",
     "add": "+ Add a shortcut",
-    "ai_title": "AI helper (optional, paid)",
-    "ai_enable": "Let them talk naturally and ask questions",
-    "ai_hint": "Uses Claude. Needs an Anthropic API key and costs a little per question. It can only open the people and shortcuts above; it can't click, type or send anything.",
-    "api_key": "API key",
     "model": "Model",
     "save": "Save",
     "saved": "Saved. They can use it straight away.",
     "back": "← Back to Aiuta",
     "error": "Something went wrong.",
-    "open_from_app": "Open this page from Aiuta (the Setup link)."
+    "open_from_app": "Open this page from Aiuta (the Setup link).",
+    "plan_title": "How much help",
+    "plan_free": "Free",
+    "plan_free_desc": "Opens things, searches, and starts emails, messages and calls. They press Send.",
+    "plan_basic": "Basic: does it for them (Amazon Nova)",
+    "plan_basic_desc": "Understands anything they say, writes the email or message, and does the steps on screen. Very cheap to run.",
+    "plan_plus": "Plus: the smartest helper (Claude)",
+    "plan_plus_desc": "Like Basic, but better at hard or unusual tasks. Costs more to run.",
+    "mode": "How should it help?",
+    "mode_do": "Do it for them (always asks before sending, buying or deleting)",
+    "mode_show": "Show them how (tells them what to press, never presses it)",
+    "aws_key": "Amazon Bedrock API key",
+    "aws_region": "AWS region",
+    "nova_model": "Model",
+    "nova_micro": "Nova Micro (cheapest)",
+    "nova_lite": "Nova Lite",
+    "claude_key": "Anthropic API key",
+    "privacy": "With Basic or Plus, the words on their screen are sent to the AI so it can work out what to press. It stops on bank, payment and sign-in pages, and never types passwords."
   }
 }
