@@ -1,0 +1,51 @@
+{
+  "person_name": "Nonno",
+  "helper_name": "Harry",
+  "speak_replies": true,
+  "speech_model_path": "C:\\Aiuta\\vosk-model-small-en-us-0.15",
+  "shortcuts": [
+    {
+      "name": "Email",
+      "action": "open_website",
+      "target": "https://mail.google.com",
+      "phrases": ["emails", "my mail", "check my messages"],
+      "reply": "Here are your emails."
+    },
+    {
+      "name": "Video call Harry",
+      "action": "call",
+      "target": "whatsapp://",
+      "phrases": ["call Harry", "ring Harry", "talk to Harry"],
+      "reply": "Opening WhatsApp. Press Harry's name, then the camera."
+    },
+    {
+      "name": "Photos",
+      "action": "open_folder",
+      "target": "C:\\Users\\Nonno\\Pictures",
+      "phrases": ["pictures", "the grandkids", "family photos"]
+    },
+    {
+      "name": "Football",
+      "action": "open_website",
+      "target": "https://www.bbc.com/sport/football",
+      "phrases": ["the football", "the scores", "calcio"]
+    },
+    {
+      "name": "Solitaire",
+      "action": "open_app",
+      "target": "C:\\Program Files\\WindowsApps\\Solitaire\\Solitaire.exe",
+      "phrases": ["cards", "play cards", "my game"]
+    },
+    {
+      "name": "Get help",
+      "action": "remote_help",
+      "target": "C:\\Program Files\\RustDesk\\rustdesk.exe",
+      "phrases": ["I'm stuck", "something is wrong", "help from Harry"]
+    },
+    {
+      "name": "Pills",
+      "action": "say",
+      "target": "The blue pill with breakfast, the white one with dinner."
+    }
+  ]
+}

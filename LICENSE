@@ -1,0 +1,69 @@
+Aiuta Community License, version 1.0 — DRAFT
+
+*** This is a draft written to describe the project owner's intent. It has
+*** not been reviewed by a lawyer. Do not rely on it until it has been.
+
+Copyright (c) 2026 Harry Catanzariti ("the Licensor")
+
+1. What you may do for free
+
+   Anyone may use, copy, change and share this software at no cost, for
+   themselves, their family, their friends, or people they care for, and
+   any non-profit, charity, community group, library, school, care home or
+   health service may do the same for the people they serve, as long as
+   they do not charge for it.
+
+2. Hosting or selling it ("Commercial Use")
+
+   "Commercial Use" means offering this software, or anything built from
+   it, to other people in exchange for money or other payment, including:
+   running it as a hosted or managed service, selling subscriptions,
+   installation, devices or support bundled with it, or charging for its
+   AI features.
+
+   Commercial Use is allowed only if you:
+
+   a. pay the Licensor ten percent (10%) of the gross revenue you receive
+      from that Commercial Use, every three months, with a short written
+      statement of how it was worked out; and
+   b. tell the Licensor in writing before you start (contact details are in
+      README.md).
+
+   Charging only to pass on your actual costs (for example the AI provider's
+   fees, at no markup) is still Commercial Use, but the 10% is owed only on
+   the amount above those costs.
+
+3. Changes go back to the project
+
+   If you change this software and then share it, host it, or make it
+   available to anyone outside your own household, you must:
+
+   a. publish the source code of your changes under this same license; and
+   b. offer them to the official repository
+      (https://github.com/harrycatanzariti-oss/Auita) as a pull request.
+
+   The Licensor is not obliged to accept a pull request.
+
+4. Contributions
+
+   By sending a contribution to the official repository you agree to the
+   terms in CONTRIBUTING.md, including that the Licensor may use your
+   contribution under this license or any other license.
+
+5. Keep this notice
+
+   Every copy, and anything built from it, must include this license and
+   the copyright notice above.
+
+6. No warranty
+
+   The software is provided "as is", without warranty of any kind. The
+   Licensor is not liable for any damage or loss arising from its use. It is
+   a convenience for opening programs and websites; it is not a medical,
+   emergency or safety device.
+
+7. Ending the license
+
+   If you break these terms, your permission ends automatically. It comes
+   back if you fix the breach (including paying anything owed) within 30
+   days of being told about it.

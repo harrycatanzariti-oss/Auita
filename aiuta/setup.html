@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aiuta Setup</title>
+<style>
+  :root { --bg:#faf7f2; --card:#fff; --ink:#1f2328; --muted:#5d6670; --line:#e3ddd3; --accent:#1f6f5c; --bad:#b3261e; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#16181b; --card:#1f2226; --ink:#eceff1; --muted:#a3abb3; --line:#33383e; --accent:#5cc2a6; --bad:#ff8a80; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:17px/1.5 system-ui, sans-serif; }
+  main { max-width:860px; margin:0 auto; padding:24px 16px 80px; }
+  h1 { font-size:28px; margin:0 0 4px; } h2 { font-size:20px; margin:28px 0 8px; }
+  p.lead { color:var(--muted); margin:0 0 16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; margin:12px 0; }
+  label { display:block; font-size:14px; color:var(--muted); margin:8px 0 4px; }
+  input, select { width:100%; font:inherit; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--ink); }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:600px){ .row { grid-template-columns:1fr; } }
+  button { font:inherit; padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  button.danger { color:var(--bad); }
+  .actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .sticky { position:sticky; bottom:0; background:var(--bg); padding:12px 0; border-top:1px solid var(--line); display:flex; gap:12px; align-items:center; }
+  #msg { color:var(--muted); } #msg.bad { color:var(--bad); }
+  .hint { font-size:14px; color:var(--muted); }
+  code { font-size:14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Aiuta Setup</h1>
+  <p class="lead">Add the things they use. Each shortcut gets a name they can say out loud, and the
+  other ways they might say it. Press <b>Try it</b> to check it opens on their screen.</p>
+
+  <div class="card">
+    <div class="row">
+      <div><label for="person">Their name</label><input id="person"></div>
+      <div><label for="helper">Your name (who they should ask for help)</label><input id="helper"></div>
+    </div>
+    <label for="model_path">Voice model folder (see the README: "Download a voice model")</label>
+    <input id="model_path" placeholder="C:\Aiuta\vosk-model-small-en-us-0.15">
+    <label><input type="checkbox" id="speak" style="width:auto"> Read replies out loud</label>
+  </div>
+
+  <h2>Shortcuts</h2>
+  <div id="list"></div>
+  <div class="actions">
+    <button id="add">+ Add a shortcut</button>
+    <button data-preset="email">+ Email (Gmail)</button>
+    <button data-preset="news">+ News</button>
+    <button data-preset="call">+ WhatsApp call</button>
+    <button data-preset="help">+ Remote help</button>
+  </div>
+
+  <h2>AI helper (optional, paid)</h2>
+  <div class="card">
+    <label><input type="checkbox" id="ai" style="width:auto"> Let them talk naturally and ask questions</label>
+    <p class="hint">Uses Claude. Needs an Anthropic API key and costs a little per question. The AI can only
+    open the shortcuts above; it can't click, type or buy anything.</p>
+    <div class="row">
+      <div><label for="key">API key</label><input id="key" type="password" autocomplete="off"></div>
+      <div><label for="model">Model</label><input id="model"></div>
+    </div>
+  </div>
+
+  <div class="sticky"><button class="primary" id="save">Save</button><span id="msg"></span></div>
+</main>
+
+<template id="tpl">
+  <div class="card shortcut">
+    <div class="row">
+      <div><label>What they say</label><input class="name" placeholder="Email"></div>
+      <div><label>What it does</label>
+        <select class="action">
+          <option value="open_website">Open a website</option>
+          <option value="open_app">Open a program</option>
+          <option value="call">Start a call (link)</option>
+          <option value="open_folder">Open a folder</option>
+          <option value="open_file">Open a file</option>
+          <option value="say">Say something</option>
+          <option value="remote_help">Open remote help (TeamViewer / RustDesk)</option>
+        </select></div>
+    </div>
+    <label>Website, program path, link, or words to say</label><input class="target">
+    <label>Other ways they might say it (comma separated)</label><input class="phrases" placeholder="e.g. my mail, check my messages">
+    <label>What the helper says when it opens (optional)</label><input class="reply" placeholder="e.g. Here you go.">
+    <div class="actions"><button class="test">Try it</button><button class="danger remove">Remove</button></div>
+  </div>
+</template>
+
+<script>
+const KEY = new URLSearchParams(location.search).get("key") || "";
+const $ = (s, el=document) => el.querySelector(s);
+const list = $("#list");
+let cfg = {};
+
+const PRESETS = {
+  email: {name:"Email", action:"open_website", target:"https://mail.google.com", phrases:["emails","my mail","messages"]},
+  news:  {name:"News", action:"open_website", target:"https://www.bbc.com/news", phrases:["the news","newspaper"]},
+  call:  {name:"Call Marco", action:"call", target:"whatsapp://", phrases:["ring Marco","video call Marco"], reply:"Opening WhatsApp. Press Marco's name, then the camera."},
+  help:  {name:"Get help", action:"remote_help", target:"C:\\Program Files\\RustDesk\\rustdesk.exe", phrases:["I'm stuck","something is wrong","call for help"]},
+};
+
+function addShortcut(sc={}) {
+  const el = $("#tpl").content.firstElementChild.cloneNode(true);
+  $(".name", el).value = sc.name || "";
+  $(".action", el).value = sc.action || "open_website";
+  $(".target", el).value = sc.target || "";
+  $(".phrases", el).value = (sc.phrases || []).filter(p => p.toLowerCase() !== (sc.name||"").toLowerCase()).join(", ");
+  $(".reply", el).value = sc.reply || "";
+  $(".remove", el).onclick = () => el.remove();
+  $(".test", el).onclick = () => post("/api/test", read(el)).then(r => say(r.reply));
+  list.appendChild(el);
+}
+
+function read(el) {
+  return { name: $(".name", el).value, action: $(".action", el).value, target: $(".target", el).value,
+           phrases: $(".phrases", el).value.split(",").map(s => s.trim()).filter(Boolean), reply: $(".reply", el).value };
+}
+
+function say(text, bad=false) { const m = $("#msg"); m.textContent = text; m.className = bad ? "bad" : ""; }
+
+async function post(path, body) {
+  const r = await fetch(path, {method:"POST", headers:{"Content-Type":"application/json","X-Aiuta-Key":KEY}, body:JSON.stringify(body)});
+  const j = await r.json();
+  if (!r.ok) { say(j.error || "Something went wrong.", true); throw new Error(j.error); }
+  return j;
+}
+
+async function load() {
+  const r = await fetch("/api/config", {headers:{"X-Aiuta-Key":KEY}});
+  if (!r.ok) { say("Open this page from the helper's window (the Setup button).", true); return; }
+  cfg = await r.json();
+  $("#person").value = cfg.person_name; $("#helper").value = cfg.helper_name;
+  $("#speak").checked = cfg.speak_replies; $("#model_path").value = cfg.speech_model_path || ""; $("#ai").checked = cfg.ai.enabled;
+  $("#key").value = cfg.ai.api_key || ""; $("#model").value = cfg.ai.model;
+  cfg.shortcuts.forEach(addShortcut);
+}
+
+$("#add").onclick = () => addShortcut();
+document.querySelectorAll("[data-preset]").forEach(b => b.onclick = () => addShortcut(PRESETS[b.dataset.preset]));
+$("#save").onclick = async () => {
+  const body = {...cfg, person_name: $("#person").value, helper_name: $("#helper").value,
+    speak_replies: $("#speak").checked, speech_model_path: $("#model_path").value.trim(),
+    ai: {...cfg.ai, enabled: $("#ai").checked, api_key: $("#key").value, model: $("#model").value},
+    shortcuts: [...list.children].map(read).filter(s => s.name || s.target)};
+  await post("/api/config", body);
+  say("Saved. They can use it straight away.");
+};
+load();
+</script>
+</body>
+</html>

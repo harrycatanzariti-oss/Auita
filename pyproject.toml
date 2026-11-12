@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aiuta"
+version = "0.1.0"
+description = "A voice helper that opens the things an older person uses on their computer."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+dependencies = [
+  "vosk>=0.3.45",
+  "sounddevice>=0.4",
+  "pyttsx3>=2.90",
+]
+
+[project.optional-dependencies]
+ai = ["anthropic"]
+dev = ["pytest"]
+
+[project.scripts]
+aiuta = "aiuta.__main__:main"
+
+[tool.setuptools]
+packages = ["aiuta"]
+
+[tool.setuptools.package-data]
+aiuta = ["setup.html"]
